@@ -1,0 +1,6 @@
+# One line ending everywhere: the repo is authored on Windows and read on Linux.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary

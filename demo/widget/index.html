@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AssistantKit — reference widget</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #111827; background: #f3f4f6; }
+    main { max-width: 720px; margin: 0 auto; padding: 56px 24px; }
+    h1 { font-size: 30px; margin: 0 0 6px; }
+    p { color: #4b5563; }
+    code { background: #e5e7eb; padding: 2px 6px; border-radius: 5px; font-size: 14px; }
+    .card { background: #fff; border-radius: 14px; padding: 20px 22px; margin: 22px 0; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .card h2 { font-size: 16px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    a { color: #111827; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>A page with an assistant on it</h1>
+  <p>Nothing here is special. One script, one endpoint, no framework, no build step.</p>
+
+  <div class="card">
+    <h2>Try this</h2>
+    <ul>
+      <li>“What is available in Dubai Marina?”</li>
+      <li><a href="?item=marina-2br">Open a listing</a>, then ask “how much is it?”</li>
+      <li>“Is the price negotiable?” — a deferral, not a guess</li>
+      <li>“How does renting work?” — answered from config, no model</li>
+      <li>“Ahmed Khan, ahmed@example.com” — becomes a lead</li>
+      <li>“Can you hold it for my cousin?” — filed for the team</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>What is happening</h2>
+    <p>The widget posts to <code>/chat</code>. <code>server.php</code> hands the message to
+      <code>AssistantKit\Assistant</code> with four demo ports: a fake catalogue, a JSON file per chat,
+      a lead file, and no model at all. Everything you see comes from the rules pack.</p>
+    <p>Leads land in <code>leads.jsonl</code> in the temp directory —
+      <code>sys_get_temp_dir()/assistantkit-demo</code>.</p>
+  </div>
+</main>
+<script src="widget.js" defer></script>
+</body>
+</html>

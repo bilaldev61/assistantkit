@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * A blank pack. Copy to packs/<your-niche>.php and fill in every value.
+ *
+ * The engine reads these keys; the words are yours. Order matters inside
+ * `facts`: the first matching entry wins, so put the narrow intents first.
+ */
+return [
+    'name'  => 'CHANGE_ME',
+
+    // How you refer to one and many. Used in every generated sentence.
+    'nouns' => [
+        'one'   => 'item',
+        'many'  => 'items',
+        'thing' => 'record',
+    ],
+
+    // Words the visitor types => the label you want to read back.
+    'types' => [
+        'widget' => 'Widget',
+        'gadget' => 'Gadget',
+    ],
+
+    /*
+     | Regexes that turn a message into Catalogue::search() criteria.
+     | The engine only recognises words; your adapter applies them.
+     */
+    'criteria' => [
+        'beds'  => '/\b(\d+)\s*(?:bed|bedrooms?)\b/i',
+        'price' => [
+            'min' => '/\b(?:from|over|above|at least)\s*([\d.,]+)\s*(k|m|million|thousand)?/i',
+            'max' => '/\b(?:under|below|up to|max)\s*([\d.,]+)\s*(k|m|million|thousand)?/i',
+        ],
+        'rent'  => '/\b(rent|renting|per month|monthly)\b/i',
+        'sale'  => '/\b(buy|buying|purchase|for sale)\b/i',
+        'type'  => '/\b(widget|gadget)\b/i',
+        'area'  => '/\b(in|at|around|near)\s+([a-z][a-z\s]{2,30})/i',
+    ],
+
+    // How people type a place => the name your data uses.
+    'aliases' => [
+        'town centre' => 'Town Centre',
+    ],
+
+    // Only these are treated as real places. Anything else is ignored.
+    'areas' => [
+        'Town Centre',
+        'Riverside',
+    ],
+
+    /*
+     | Question -> answer. `fact` is a key your Catalogue::facts() can supply;
+     | `defer` is the sentence used when it cannot, and must ask for a way back.
+     | Narrow patterns first: "is the price negotiable" must not hit `price`.
+     */
+    'facts' => [
+        'negotiable' => [
+            'match' => '/\b(negotiable|discount|best price)\b/i',
+            'defer' => 'whether there is room on the price',
+        ],
+        'price' => [
+            'match' => '/\b(price|cost|how much)\b/i',
+            'fact'  => 'price',
+            'defer' => 'the current price',
+        ],
+        'availability' => [
+            'match' => '/\b(available|in stock|lead time)\b/i',
+            'fact'  => 'availability',
+            'defer' => 'when it will be available',
+        ],
+    ],
+
+    // Procedural topics answered from config. No digits allowed in these steps.
+    'process' => [
+        'buying'  => '/\b(buy|buying|order|ordering)\b/i',
+        'returns' => '/\b(return|refund|warranty)\b/i',
+    ],
+
+    // Questions about you rather than the items.
+    'agency' => [
+        'contact' => '/\b(phone|call|contact|whatsapp|reach you)\b/i',
+        'email'   => '/\b(e-?mail)\b/i',
+        'hours'   => '/\b(hours|open|opening|closed)\b/i',
+        'office'  => '/\b(office|address|located|where are you)\b/i',
+        'areas'   => '/\b(which areas|what areas|cover)\b/i',
+    ],
+
+    'intents' => [
+        'greeting'  => '/^(hi|hey|hello|good (morning|afternoon|evening))\b/i',
+        'thanks'    => '/\b(thanks|thank you|appreciate it)\b/i',
+        'search'    => '/\b(looking for|do you have|show me|any |options|list)\b/i',
+        'judgement' => '/\b(compare|better|best|recommend|should i|why|worth it)\b/i',
+    ],
+
+    /*
+     | The tool menu for this niche — an allowlist, not a list of exceptions.
+     | A name is only offerable when it appears here *and* a handler is
+     | registered for it; built-ins cannot be replaced. Drop a name to switch
+     | that action off for this site, and add your own (see examples/tools/
+     | and TOOLS.md) only when your data can actually answer it.
+     */
+    'tools' => [
+        'search_items',
+        'get_item',
+        'save_lead',
+        'record_unanswered_question',
+    ],
+];
