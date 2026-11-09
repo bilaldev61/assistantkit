@@ -210,7 +210,65 @@ edit one line, ask again.
 
 ---
 
-## 6. Where to go next
+## 6. Three commands that keep the rules honest
+
+The Kit ships its own rule tooling. No extra install, no Node, no npm — it is PHP files in
+`tools/` behind two small scripts.
+
+```sh
+php bin/rules.php lint                              # is this pack sane?
+php bin/rules.php ask "how much is it?" --item=marina-2br
+                                                    # which rule answers, and what it says
+php bin/rules.php cases                             # replay rules/<pack>.cases.php
+php bin/rules-build.php rules/bikes.rules.php --out=packs/bikes.php
+                                                    # words in, a pack out
+```
+
+**`lint`** reads the pack the way the engine reads it and catches the mistakes that are
+invisible in the file:
+
+| Finding | Why it matters |
+|---|---|
+| `facts.price.match is not a valid regex` | the rule silently never fires |
+| `facts.x has neither fact nor defer` | it can only block the rules below it |
+| `process.sizing has no steps in config` | the pattern can never answer |
+| `intents.foo is never read by the engine` | a typo in the intent name |
+| `alias 'JVC' is not lowercase` | messages are normalised, so it never matches |
+| `tool 'check_stock' is not a built-in` | it stays hidden until you register a handler |
+
+**`ask`** traces one sentence through the real engine: the `kind`, the first fact rule that
+matched, and the reply. `facts negotiable (fact: none, defer: whether there is room on the
+price)` means "recognised on purpose, and deferred on purpose".
+
+**`cases`** replays `rules/property.cases.php` — 22 rows of `ask` → expected `kind`, with
+optional `item`, `contains` and `missing`. Every bug you fix gets a row; the same file runs
+inside the test suite (`tests/RulesToolingTest.php`), so a rule change that breaks "is it
+negotiable?" fails the build instead of a customer's chat.
+
+**`rules-build`** is the generator. You write `rules/bikes.rules.php`, which is just words:
+
+```php
+'facts' => [
+    ['key' => 'negotiable', 'phrases' => ['negotiable', 'any discount', 'best price'], 'defer' => 'whether there is room on the price'],
+    ['key' => 'price',      'phrases' => ['price', 'how much', 'cost'], 'fact' => 'price', 'defer' => 'the price of this model'],
+],
+```
+
+and it writes the escaped, ordered regexes into `packs/bikes.php`. Two things it will not
+do: it will not guess your words, and it will not build a table where a broader rule sits
+above a narrower one —
+
+```
+Refusing to build: 1 ambiguous rule(s).
+  - phrase "best price" is listed under fact "negotiable" but the pattern of fact "price",
+    which sits above it, catches that phrase first
+```
+
+`packs/bikes.php` is committed as generated output, and a test fails if it drifts from its
+table, so a hand edit that forgets to rebuild is caught. For an existing pack like
+`property.php`, hand-editing is still fine — run `lint` and `cases` afterwards.
+
+## 7. Where to go next
 
 - [`INTEGRATION.md`](INTEGRATION.md) — the four ports, in code, with a checklist.
 - [`TOOLS.md`](TOOLS.md) — per-site tool menus, allowlists, sign-in rules.

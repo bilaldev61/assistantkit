@@ -46,7 +46,10 @@ Prefer a terminal?
 
 ```sh
 php bin/demo.php                                    # scripted conversation, prints every kind
-php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 31 tests, no setup
+php bin/rules.php lint                              # is this pack sane?
+php bin/rules.php ask "how much is it?" --item=marina-2br
+php bin/rules.php cases                             # 22 expected answers, replayed
+php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 38 tests, no setup
 ```
 
 ---
@@ -112,6 +115,7 @@ $assistant = new Assistant(
 |---|---|
 | see it work | this page, then `demo/widget/` |
 | write your rules and words | [`RULES.md`](RULES.md) |
+| check and prove your rules | [`RULES.md`](RULES.md) §6 — `bin/rules.php`, `bin/rules-build.php` |
 | wire it into a real app | [`INTEGRATION.md`](INTEGRATION.md) |
 | add order tracking, stock, bookings | [`TOOLS.md`](TOOLS.md) + `examples/tools/` |
 | change the industry | copy `packs/property.php` or `packs/_template.php` |
@@ -157,9 +161,13 @@ src/                 the engine — no framework, no dependencies
   Tools/               Tool, ToolRegistry, ToolBox (the four built-ins)
   Pack/ Prompt/ Value/ Support/
   Demo/                fakes: FakeCatalogue, MemoryStore, MemoryLeadSink, ScriptedModel
-packs/               property.php (real), _template.php (fill in your own)
+packs/               property.php (real), bikes.php (generated), _template.php
 config/              brand, contacts, hours, limits, asks, which pack, tool narrowing
 bin/demo.php         scripted conversation in the terminal
+bin/rules.php        lint a pack · trace one question · replay the cases
+bin/rules-build.php  words in, a pack out (rules/<niche>.rules.php → packs/)
+tools/               RulesInspector, CaseRunner, RulesCompiler — the rule tooling
+rules/               bikes.rules.php (builder input), property.cases.php (expectations)
 demo/widget/         the runnable widget over fake data (start here)
 examples/tools/      six tool templates
 tests/               the suite — no database, no network
