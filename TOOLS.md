@@ -1,5 +1,8 @@
 # Tools, and how a site switches one off
 
+> New here? [`README.md`](README.md) first, then [`RULES.md`](RULES.md) for the pack itself.
+> This page is only about the model's tool menu.
+
 A tool is a call the model may make. Which tools exist **per site** is decided by that
 site's pack; the engine never hands out a menu the site did not ask for.
 

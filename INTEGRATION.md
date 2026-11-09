@@ -1,5 +1,8 @@
 # Integrating AssistantKit into a site
 
+> New here? [`README.md`](README.md) shows it running in 60 seconds; [`RULES.md`](RULES.md)
+> is how the words and rules get written. This page is the wiring.
+
 The Kit answers chat messages. It owns the *thinking*: what the message means, when to
 defer, when to capture an email, which tool to call, what the prompt says. It owns none
 of your data. You supply four small classes and one vocabulary file. Plain PHP 8.2+.
