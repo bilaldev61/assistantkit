@@ -307,6 +307,15 @@ A draft is a *starting vocabulary, not a finished pack*: every drafted row defer
 look at your data and wire a real `fact`. It never invents a value — the same rule as
 `facts()` returning `null`.
 
+**`kit-scaffold` is the same idea, for the code instead of the words.** A rules table only
+answers if a `Catalogue` can feed it, and that class is the one port a tool cannot finish by
+judgement alone. `php bin/kit-scaffold.php scaffold/<site>.json` reads a db spec (your table,
+columns and which columns are safe to state) and writes a PDO `Catalogue` — marking every
+column you did *not* flag as a comment, so `facts()` stays silent and the rule defers, exactly
+like an unmarked draft row. The memory and leads ports need no drafting at all:
+`AssistantKit\Pdo\PdoStore` and `PdoLeads` are ready to use. Full wiring:
+[`INTEGRATION.md`](INTEGRATION.md) §1.
+
 ## 7. Where to go next
 
 - [`INTEGRATION.md`](INTEGRATION.md) — the four ports, in code, with a checklist.

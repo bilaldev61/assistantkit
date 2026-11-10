@@ -1,0 +1,36 @@
+{
+    "name": "furniture",
+
+    "db": {
+        "table": "products",
+
+        "columns": { "slug": "slug", "title": "name", "url": "url" },
+
+        "criteria": {
+            "type": { "column": "category", "match": "exact" },
+            "area": { "column": "city", "match": "like" },
+            "price_min": { "column": "price", "match": "min" },
+            "price_max": { "column": "price", "match": "max" }
+        },
+
+        "facts": [
+            { "key": "price", "column": "price", "say": "The price is %s." },
+            { "key": "dimensions", "column": "dimensions", "say": "It measures %s." },
+            { "key": "material", "defer": "what it is made from" },
+            { "key": "delivery", "defer": "whether it ships" }
+        ],
+
+        "leads": {
+            "table": "enquiries",
+            "columns": {
+                "name": "name",
+                "email": "email",
+                "phone": "phone",
+                "message": "notes",
+                "item": "product_id",
+                "source": "source",
+                "chat": "chat_id"
+            }
+        }
+    }
+}

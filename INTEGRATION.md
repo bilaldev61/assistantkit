@@ -58,6 +58,37 @@ converse(string $system, array $messages, array $tools, callable $runTool): stri
 - `isAvailable() === false` runs rules-only. That is a supported mode: no key, no cost,
   no latency.
 
+### Two of these ship ready-made, and the third can be generated
+
+You do not have to hand-write all four. The Kit already carries framework-free,
+tested implementations for two, and a generator for the third:
+
+| Port | What the Kit gives you |
+|---|---|
+| `ConversationStore` | `AssistantKit\Pdo\PdoStore` — chat memory over any PDO handle. `->migrate()`
+  builds its three tables on sqlite, MySQL/MariaDB or Postgres. On a framework, prefer binding
+  your own Eloquent store; you never have to. |
+| `LeadSink` | `AssistantKit\Pdo\PdoLeads` — one insert into its own table, same `->migrate()`.
+  If leads live in an existing enquiries table, point your own 15-line sink at it instead. |
+| `Catalogue` | `php bin/kit-scaffold.php scaffold/<site>.json` writes a PDO-backed Catalogue
+  from a small spec of your table and columns. See below. |
+
+```sh
+php bin/kit-scaffold.php scaffold/catalogue.example.json --out=scaffold
+#   → <Name>Catalogue.php  a working Catalogue; every column you did NOT mark
+#                            answerable is left as a comment, not a value, so
+#                            facts() stays silent and the rule defers
+#   → <Name>Leads.php      only if the spec maps leads onto your own table
+#   → wiring.php           the snippet binding all four ports together
+```
+
+The spec is a `db` object with `table`, a `columns` map (`slug`, `title`, `url`), a
+`criteria` map (each `{ "column": ..., "match": "exact|like|min|max" }`), a `facts`
+list (a `column` + `say` template answers; no column is a deferral), and an optional
+`leads` block. It is the code twin of `bin/rules-draft.php`: both draft from your data
+and leave every unconfirmed value for a human to promote. See
+[`RULES.md`](RULES.md) §6 for the parallel and the example file.
+
 ## 2. The tools
 
 The engine ships **four built-in tools**, and they are built-in because each one sits on a
@@ -157,9 +188,10 @@ person. Everything visitor-visible is there or in the pack — never in the engi
 
 - [ ] Copy `src/`, `config/`, `packs/`; register the `AssistantKit\` namespace.
 - [ ] Pick a pack or copy `packs/_template.php` and write your niche's words.
-- [ ] Implement `Catalogue`. Start with `facts()` returning `[]`.
-- [ ] Implement `ConversationStore` — two tables, or your existing chat rows.
-- [ ] Implement `LeadSink` — one insert is enough to start.
+- [ ] Implement `Catalogue` — or run `bin/kit-scaffold.php` to generate one from your columns.
+      Start with `facts()` returning `[]` and promote a fact only when the value is safe to say.
+- [ ] Implement `ConversationStore` — or use the shipped `AssistantKit\Pdo\PdoStore` (`->migrate()`).
+- [ ] Implement `LeadSink` — or use `AssistantKit\Pdo\PdoLeads`, or a 15-line insert into your own table.
 - [ ] Implement `LanguageModel`, or pass `null` and ship rules-only first.
 - [ ] Put the real phone, email and hours in `config/assistant.php`.
 - [ ] Decide the tool menu: the four built-ins, or add `examples/tools/` templates.

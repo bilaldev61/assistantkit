@@ -49,7 +49,7 @@ php bin/demo.php                                    # scripted conversation, pri
 php bin/rules.php lint                              # is this pack sane?
 php bin/rules.php ask "how much is it?" --item=marina-2br
 php bin/rules.php cases                             # 22 expected answers, replayed
-php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 46 tests, no setup
+php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 58 tests, no setup
 ```
 
 Starting a brand-new site with no rules yet? Draft them instead of facing a blank page:
@@ -58,6 +58,17 @@ Starting a brand-new site with no rules yet? Draft them instead of facing a blan
 php bin/rules-draft.php inventory rules/inventory.example.json   # your columns -> a rules table
 php bin/rules-draft.php questions rules/questions.example.txt    # the questions asked -> what to add
 ```
+
+And the ports themselves are less work than they look — two ship ready-made, one is generated:
+
+```sh
+php bin/kit-scaffold.php scaffold/catalogue.example.json          # your columns -> a Catalogue (+ LeadSink) to read
+php bin/kit-scaffold.php scaffold/catalogue.example.json --out=scaffold   # ...write the files
+```
+
+`AssistantKit\Pdo\PdoStore` and `PdoLeads` are already usable over any PDO handle (call
+`->migrate()` once); the scaffolder writes the `Catalogue` and marks every column you did
+not flag as answerable as a deferral, so it never invents a fact.
 
 ---
 
@@ -73,6 +84,9 @@ php bin/rules-draft.php questions rules/questions.example.txt    # the questions
 
 The assistant is only as specific as #1 and #5. `facts()` must return `null` for anything
 unknown — never a guess, because a confident wrong price is the one bug that costs money.
+
+You write #4 and #5 by hand. #1 can be generated (`bin/kit-scaffold.php`), and #2 and #3
+ship ready-made (`AssistantKit\Pdo\PdoStore`, `PdoLeads`) if you would rather not.
 
 **How to write #5:** [`RULES.md`](RULES.md) — the key-by-key pack guide, a 30-minute
 worksheet and the `kind` → fix table.
@@ -123,6 +137,7 @@ $assistant = new Assistant(
 | see it work | this page, then `demo/widget/` |
 | write your rules and words | [`RULES.md`](RULES.md) |
 | start rules for a brand-new site | [`RULES.md`](RULES.md) §6 — `bin/rules-draft.php` |
+| skip the plumbing for a brand-new site | [`INTEGRATION.md`](INTEGRATION.md) §1 — `bin/kit-scaffold.php`, `src/Pdo/` |
 | check and prove your rules | [`RULES.md`](RULES.md) §6 — `bin/rules.php`, `bin/rules-build.php` |
 | wire it into a real app | [`INTEGRATION.md`](INTEGRATION.md) |
 | add order tracking, stock, bookings | [`TOOLS.md`](TOOLS.md) + `examples/tools/` |
@@ -168,6 +183,7 @@ src/                 the engine — no framework, no dependencies
   Capture/             ContactCapture (name / email / phone from a sentence)
   Tools/               Tool, ToolRegistry, ToolBox (the four built-ins)
   Pack/ Prompt/ Value/ Support/
+  Pdo/                 PdoStore, PdoLeads — the memory + leads ports, ready over any PDO
   Demo/                fakes: FakeCatalogue, MemoryStore, MemoryLeadSink, ScriptedModel
 packs/               property.php (real), bikes.php (generated), _template.php
 config/              brand, contacts, hours, limits, asks, which pack, tool narrowing
@@ -175,9 +191,11 @@ bin/demo.php         scripted conversation in the terminal
 bin/rules.php        lint a pack · trace one question · replay the cases
 bin/rules-build.php  words in, a pack out (rules/<niche>.rules.php → packs/)
 bin/rules-draft.php  a new site in: draft a rules table from your columns or your question log
-tools/               RulesInspector, CaseRunner, RulesCompiler, RulesDrafter — the rule tooling
+bin/kit-scaffold.php a new site in: generate a Catalogue (+ LeadSink) from your table and columns
+tools/               RulesInspector, CaseRunner, RulesCompiler, RulesDrafter, PortScaffolder
 rules/               bikes.rules.php (builder input), property.cases.php (expectations),
                      inventory.example.json + questions.example.txt (drafter samples)
+scaffold/            catalogue.example.json — a db spec for bin/kit-scaffold.php
 demo/widget/         the runnable widget over fake data (start here)
 examples/tools/      six tool templates
 tests/               the suite — no database, no network
