@@ -49,7 +49,14 @@ php bin/demo.php                                    # scripted conversation, pri
 php bin/rules.php lint                              # is this pack sane?
 php bin/rules.php ask "how much is it?" --item=marina-2br
 php bin/rules.php cases                             # 22 expected answers, replayed
-php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 38 tests, no setup
+php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 46 tests, no setup
+```
+
+Starting a brand-new site with no rules yet? Draft them instead of facing a blank page:
+
+```sh
+php bin/rules-draft.php inventory rules/inventory.example.json   # your columns -> a rules table
+php bin/rules-draft.php questions rules/questions.example.txt    # the questions asked -> what to add
 ```
 
 ---
@@ -115,6 +122,7 @@ $assistant = new Assistant(
 |---|---|
 | see it work | this page, then `demo/widget/` |
 | write your rules and words | [`RULES.md`](RULES.md) |
+| start rules for a brand-new site | [`RULES.md`](RULES.md) §6 — `bin/rules-draft.php` |
 | check and prove your rules | [`RULES.md`](RULES.md) §6 — `bin/rules.php`, `bin/rules-build.php` |
 | wire it into a real app | [`INTEGRATION.md`](INTEGRATION.md) |
 | add order tracking, stock, bookings | [`TOOLS.md`](TOOLS.md) + `examples/tools/` |
@@ -166,8 +174,10 @@ config/              brand, contacts, hours, limits, asks, which pack, tool narr
 bin/demo.php         scripted conversation in the terminal
 bin/rules.php        lint a pack · trace one question · replay the cases
 bin/rules-build.php  words in, a pack out (rules/<niche>.rules.php → packs/)
-tools/               RulesInspector, CaseRunner, RulesCompiler — the rule tooling
-rules/               bikes.rules.php (builder input), property.cases.php (expectations)
+bin/rules-draft.php  a new site in: draft a rules table from your columns or your question log
+tools/               RulesInspector, CaseRunner, RulesCompiler, RulesDrafter — the rule tooling
+rules/               bikes.rules.php (builder input), property.cases.php (expectations),
+                     inventory.example.json + questions.example.txt (drafter samples)
 demo/widget/         the runnable widget over fake data (start here)
 examples/tools/      six tool templates
 tests/               the suite — no database, no network

@@ -1,0 +1,27 @@
+{
+    "name": "furniture",
+    "nouns": { "one": "piece", "many": "pieces", "thing": "item" },
+
+    "types": {
+        "sofa": "Sofa",
+        "table": "Table",
+        "chair": "Chair",
+        "bed": "Bed",
+        "wardrobe": "Wardrobe"
+    },
+
+    "areas": ["Dubai", "Abu Dhabi", "Sharjah"],
+
+    "facts": [
+        { "key": "dimensions", "asks": ["what size", "dimensions", "how big"], "fact": "dimensions" },
+        { "key": "price",      "asks": ["how much", "price", "cost"],           "fact": "price" },
+        { "key": "material",   "asks": ["what material", "is it real wood", "veneer"], "fact": "material" },
+        { "key": "delivery",   "asks": ["do you deliver", "delivery", "shipping"] },
+        { "key": "assembly",   "asks": ["assembly", "do you install", "flat pack"] }
+    ],
+
+    "process": {
+        "ordering": ["how do i order", "how to buy", "place an order"],
+        "returns":  ["returns", "refund", "exchange"]
+    }
+}

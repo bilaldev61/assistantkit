@@ -97,7 +97,9 @@ about the price".
 
 **Step 1 — collect ten real questions.** Not invented ones. Pull them from WhatsApp,
 email, the contact form, or just write down what you get asked on the phone. Ten is enough
-to start; the deferral log (`questions()`) will hand you the next twenty.
+to start; the deferral log (`questions()`) will hand you the next twenty. Facing a blank
+page? `php bin/rules-draft.php` (§6) turns your data columns or a pasted question log into
+a starting table so you are editing suggestions, not writing regex from nothing.
 
 **Step 2 — put each question in one of four buckets.**
 
@@ -210,12 +212,16 @@ edit one line, ask again.
 
 ---
 
-## 6. Three commands that keep the rules honest
+## 6. The commands that draft, build and keep the rules honest
 
 The Kit ships its own rule tooling. No extra install, no Node, no npm — it is PHP files in
-`tools/` behind two small scripts.
+`tools/` behind a few small scripts.
 
 ```sh
+php bin/rules-draft.php inventory rules/inventory.example.json
+                                                    # your columns -> a rules table
+php bin/rules-draft.php questions rules/questions.example.txt --pack=property
+                                                    # your question log -> what to add next
 php bin/rules.php lint                              # is this pack sane?
 php bin/rules.php ask "how much is it?" --item=marina-2br
                                                     # which rule answers, and what it says
@@ -267,6 +273,39 @@ Refusing to build: 1 ambiguous rule(s).
 `packs/bikes.php` is committed as generated output, and a test fails if it drifts from its
 table, so a hand edit that forgets to rebuild is caught. For an existing pack like
 `property.php`, hand-editing is still fine — run `lint` and `cases` afterwards.
+
+**`rules-draft` is the blank-page solver.** It writes a rules *table* (the words), never a
+pack directly — you still run `rules-build` on it. Two feeds, both with no model and no
+database:
+
+- **`inventory <file.json>`** — describe the columns your site can actually answer. Each
+  fact becomes a row; a row you mark with a `fact` key is wired to quote that value, a row
+  you leave unmarked becomes an honest deferral. Generic `intents`, `agency` answers and a
+  `price` search come baked in, so the very first build already greets and answers "what
+  are your hours?".
+
+  ```json
+  { "name": "furniture",
+    "facts": [
+      { "key": "price",    "asks": ["how much", "price"], "fact": "price" },
+      { "key": "delivery", "asks": ["do you deliver", "shipping"] }
+    ] }
+  ```
+  → `price` quotes your data; `delivery` defers to the team until you add the column.
+
+- **`questions <log> [--pack=name]`** — paste the unanswered-questions report
+  (`ConversationStore::questions()`, one question per line, or JSON). It clusters wording
+  by shared topic words, **reports the topics your pack already answers** (so you do not
+  redraft them), and drafts the rest as deferrals. This is the loop in §4 turned into a
+  command: the log tells you what to add, the drafter writes the starting row.
+
+  ```sh
+  php bin/rules-draft.php questions log.txt --pack=property --out=rules/next.rules.php
+  ```
+
+A draft is a *starting vocabulary, not a finished pack*: every drafted row defers until you
+look at your data and wire a real `fact`. It never invents a value — the same rule as
+`facts()` returning `null`.
 
 ## 7. Where to go next
 

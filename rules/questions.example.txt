@@ -1,0 +1,24 @@
+# Unanswered questions exported from the chat log, one per line.
+# Pull these from ConversationStore::questions() or your inbox. Lines
+# starting with # are ignored, as are blanks.
+#
+# Try it end to end:
+#   php bin/rules-draft.php inventory rules/inventory.example.json --out=rules/furniture.rules.php
+#   php bin/rules-build.php rules/furniture.rules.php --out=packs/furniture.php
+#   php bin/rules-draft.php questions rules/questions.example.txt --pack=furniture
+
+do you deliver to sharjah
+can you deliver this sofa next week
+how long does delivery usually take
+what is the price of the oak dining table
+how much is the corner sofa
+is that real wood or a veneer
+what material is the frame made of
+is assembly included in the price
+do you assemble the furniture when it arrives
+can i pay in instalments
+do you offer finance on big orders
+is there a warranty on the sofa
+what is your returns policy
+do you make custom sizes
+can i see it in person first

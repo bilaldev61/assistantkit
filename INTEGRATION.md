@@ -104,7 +104,11 @@ free of order lookups. Details, auth rules and the menu budget: [`TOOLS.md`](TOO
 
 ## 3. The pack
 
-One file per industry: `packs/<name>.php`. Copy `packs/_template.php`.
+One file per industry: `packs/<name>.php`. Copy `packs/_template.php`. Starting from a
+real database? `php bin/rules-draft.php inventory <your-columns.json>` writes a starting
+rules table for you (see [`RULES.md`](RULES.md) §6), and once the site is live
+`php bin/rules-draft.php questions <log>` drafts the next rows from the questions you
+could not answer.
 
 It holds nouns, item types, criteria patterns, area names and aliases, facts (question
 pattern → fact key → sentence to say instead), process steps, agency intents, the
@@ -161,7 +165,8 @@ person. Everything visitor-visible is there or in the pack — never in the engi
 - [ ] Decide the tool menu: the four built-ins, or add `examples/tools/` templates.
 - [ ] Set `'visitor' => ['signed_in' => ...]` if any tool reads a person's own record.
 - [ ] Ask ten questions your visitors actually ask; fix the pack, not the engine.
-- [ ] Watch `questions()` — that list is next week's work.
+- [ ] Watch `questions()` — that list is next week's work. Feed it straight back in with
+      `php bin/rules-draft.php questions <log>` to draft the rows you are missing.
 
 ## 6. What is not included
 
