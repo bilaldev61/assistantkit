@@ -255,6 +255,40 @@ class AssistantTest extends TestCase
         $this->assertStringContainsString('2-bedroom apartment in Dubai Marina', $reply->text);
     }
 
+    public function test_an_identity_question_is_answered_without_the_model(): void
+    {
+        $model = new ScriptedModel('Should not run.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'are you a real person or ai');
+
+        $this->assertSame('rule:identity', $reply->kind);
+        $this->assertStringContainsString('website assistant', $reply->text);
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_greeting_with_filler_words_is_still_small_talk(): void
+    {
+        $model = new ScriptedModel('Should not run.');
+
+        foreach (['hlo ge', 'hi ji', 'hello yaar', 'salam sahab'] as $msg) {
+            $reply = $this->assistant($model)->reply("chat-{$msg}", $msg);
+            $this->assertSame('rule:greeting', $reply->kind, "\"{$msg}\" should be greeting");
+        }
+
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_a_process_question_about_viewings_is_answered_from_config(): void
+    {
+        $model = new ScriptedModel('Should not run.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'how do i book a viewing');
+
+        $this->assertSame('rule:process', $reply->kind);
+        $this->assertStringContainsString('viewings', $reply->text);
+        $this->assertSame([], $model->prompts);
+    }
+
     /** @param array<string, mixed> $overrides */
     private function assistant(?LanguageModel $model = null, array $overrides = []): Assistant
     {

@@ -75,8 +75,9 @@ return [
 
     // Procedural topics answered from config. No digits allowed in these steps.
     'process' => [
-        'buying'  => '/\b(buy|buying|order|ordering)\b/i',
-        'returns' => '/\b(return|refund|warranty)\b/i',
+        'buying'   => '/\b(buy|buying|order|ordering)\b/i',
+        'returns'  => '/\b(return|refund|warranty)\b/i',
+        'viewings' => '/\b(viewings?|inspection|appointment)\b/i',
     ],
 
     // Questions about you rather than the items.
@@ -91,8 +92,9 @@ return [
     ],
 
     'intents' => [
-        'greeting'  => '/^(hi|hey|hello|good (morning|afternoon|evening))\b/i',
+        'greeting'  => '/^(?:hi+|h[ae]l+o+|hl+o*w?|hey+|hy+|hai|sala+m|slm|assalam[u]? ?o? ?alaikum|aoa|yo|good (?:morning|afternoon|evening|day))(?:\s+(?:ge|ji|yaar|sahab|sir|bhai|na|haan|bas|to))*\s*$/i',
         'thanks'    => '/\b(thanks|thank you|appreciate it)\b/i',
+        'identity'  => '/\b(?:are you|you(?:\'re| are)?)\s+(?:an?\s+|the\s+)?(?:real|human|person|ai|bot|robot|artificial|chat.?gpt|openai)\b|\b(?:who\s+(?:made|built|created)\s+you|what\s+are\s+you|is\s+this\s+(?:ai|a\s+bot|a\s+robot))\b/i',
         'search'    => '/\b(looking for|do you have|show me|any |options|list)\b/i',
         'judgement' => '/\b(compare|better|best|recommend|should i|why|worth it)\b/i',
     ],

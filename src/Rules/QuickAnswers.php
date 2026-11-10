@@ -34,6 +34,10 @@ final class QuickAnswers
             return $reply;
         }
 
+        if ($this->pack->matches('identity', $text)) {
+            return $this->identity();
+        }
+
         if ($reply = $this->fact($conversation, $text, $facts)) {
             return $reply;
         }
@@ -167,6 +171,17 @@ final class QuickAnswers
             : $this->ask('details');
 
         return new Reply($text, 'rule:deferral_' . $topic);
+    }
+
+    private function identity(): Reply
+    {
+        $agent = $this->from('agent');
+
+        return new Reply(
+            'I\'m the website assistant for ' . $this->from('name') . ' - an AI tool that answers from our records. '
+            . 'For anything that needs a human, ' . $agent . ' and the team handle the real side.',
+            'rule:identity',
+        );
     }
 
     private function greeting(): string

@@ -137,5 +137,26 @@ return [
             'kind'    => 'rule:search',
             'missing' => '4-bedroom villa',
         ],
+        [
+            // "Are you a real person?" costs 2,600 tokens in model but the
+            // answer is static: one line from config.
+            'ask'      => 'are you a real person or ai',
+            'kind'     => 'rule:identity',
+            'contains' => 'website assistant',
+        ],
+        [
+            // A visitor typed "hlo ge" - two words, both meaningless beyond
+            // "hello". Costing 2,600 tokens for a greeting is absurd.
+            'ask'      => 'hlo ge',
+            'kind'     => 'rule:greeting',
+            'contains' => 'Hello',
+        ],
+        [
+            // "How do I book a viewing?" is procedural; the model can only
+            // defer. The rules know the steps from config.
+            'ask'      => 'how do i book a viewing',
+            'kind'     => 'rule:process',
+            'contains' => 'viewings',
+        ],
     ],
 ];

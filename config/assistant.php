@@ -41,6 +41,16 @@ return [
             ],
             'note' => 'The fees and the transfer dates are confirmed in writing before you commit.',
         ],
+        'viewing' => [
+            'title' => 'How viewings work',
+            'steps' => [
+                'Find a property you like on the listings page or through this chat.',
+                'Use the enquiry form or tell us which one and when suits.',
+                ':agent confirms a time and meets you there - same or next day in most cases.',
+                'Bring questions about price, payment or possession to the viewing.',
+            ],
+            'note' => ':agent will arrange the time directly with you - there is no online booking system.',
+        ],
     ],
 
     'limits' => [

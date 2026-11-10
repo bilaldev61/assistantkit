@@ -126,6 +126,7 @@ return [
     'process' => [
         'renting' => '/\b(rent|renting|tenant|tenancy)\b/i',
         'buying'  => '/\b(buy|buying|purchase|buyer)\b/i',
+        'viewing' => '/\b(viewings?|inspection)\b/i',
     ],
 
     'agency' => [
@@ -141,9 +142,12 @@ return [
     ],
 
     'intents' => [
-        'greeting' => '/^(hi|hey|hello|good (morning|afternoon|evening)|salaam|salam)\b/i',
-        'thanks'   => '/\b(thanks|thank you|appreciate it|that helps|perfect|got it)\b/i',
-        'search'   => '/\b(looking for|do you have|show me|any |search|options|available|list)\b/i',
+        // Typo variants ("hlo", "slm") are what visitors actually type.
+        // Trailing fillers ("ge", "ji") are sentence-final noise in South-Asian English.
+        'greeting'  => '/^(?:hi+|h[ae]l+o+|hl+o*w?|hey+|hy+|hai|sala+m|slm|assalam[u]? ?o? ?alaikum|aoa|yo|good (?:morning|afternoon|evening|day))(?:\s+(?:ge|ji|yaar|sahab|sir|bhai|na|haan|bas|to))*\s*$/i',
+        'thanks'    => '/\b(thanks|thank you|appreciate it|that helps|perfect|got it)\b/i',
+        'identity'  => '/\b(?:are you|you(?:\'re| are)?)\s+(?:an?\s+|the\s+)?(?:real|human|person|ai|bot|robot|artificial|chat.?gpt|openai)\b|\b(?:who\s+(?:made|built|created)\s+you|what\s+are\s+you|is\s+this\s+(?:ai|a\s+bot|a\s+robot))\b/i',
+        'search'    => '/\b(looking for|do you have|show me|any |search|options|available|list)\b/i',
         'judgement' => '/\b(compare|better|best|recommend|should i|why|explain|difference|worth it|invest)\b/i',
     ],
 ];
