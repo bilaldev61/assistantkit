@@ -34,7 +34,9 @@ return [
         ],
         'rent'  => '/\b(rent|renting|per month|monthly)\b/i',
         'sale'  => '/\b(buy|buying|purchase|for sale)\b/i',
-        'type'  => '/\b(widget|gadget)\b/i',
+        // Write the plural inside the pattern: a type word that only matches one
+        // number drops the filter and shows the visitor the whole shelf.
+        'type'  => '/\b(widget|gadget)s?\b/i',
         'area'  => '/\b(in|at|around|near)\s+([a-z][a-z\s]{2,30})/i',
     ],
 
@@ -81,7 +83,9 @@ return [
     'agency' => [
         'contact' => '/\b(phone|call|contact|whatsapp|reach you)\b/i',
         'email'   => '/\b(e-?mail)\b/i',
-        'hours'   => '/\b(hours|open|opening|closed)\b/i',
+        // Tolerate the typo, refuse the measurement: "hourss" is still a question
+        // about opening times, "24 hours" is not.
+        'hours'   => '/\b(timings?|(?<!\d )h[ou]*rs*|opening (?:hours?|time)|do you open|are you open)\b/i',
         'office'  => '/\b(office|address|located|where are you)\b/i',
         'areas'   => '/\b(which areas|what areas|cover)\b/i',
     ],

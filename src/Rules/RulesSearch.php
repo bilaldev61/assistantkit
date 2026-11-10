@@ -11,7 +11,8 @@ use AssistantKit\Value\Reply;
 /**
  * The listing layer: the same regex idea, but the answers come from the host's
  * catalogue. Returns null when the message is not about finding something, so
- * the model still gets judgement questions.
+ * the model still gets judgement questions - which is what $aheadOfModel makes
+ * strict, because that is the only moment a model is there to receive them.
  */
 final class RulesSearch
 {
@@ -22,7 +23,14 @@ final class RulesSearch
         private readonly array $config,
     ) {}
 
-    public function answer(Conversation $conversation, string $message): ?Reply
+    /**
+     * @param bool $aheadOfModel true when a model is still waiting behind this
+     *                           layer. With one, this layer takes only what the
+     *                           shelf can settle on its own; without one it
+     *                           answers loosely, because a shortlist beats an
+     *                           apology.
+     */
+    public function answer(Conversation $conversation, string $message, bool $aheadOfModel = false): ?Reply
     {
         $text = Text::normalise($message);
 
@@ -35,6 +43,10 @@ final class RulesSearch
         }
 
         $criteria = $this->criteria($text);
+
+        if ($aheadOfModel && $this->notAQuery($text, $criteria)) {
+            return null;
+        }
 
         if ($criteria === [] && ! $this->pack->matches('search', $text)) {
             return null;
@@ -55,6 +67,27 @@ final class RulesSearch
         }
 
         return new Reply($this->listing($result, $criteria), 'rule:search');
+    }
+
+    /**
+     * Whether the shelf can settle this on its own.
+     *
+     * A judgement is not a search however many filters it carries: "compare a 2
+     * bed in Marina with a 3 bed in Downtown" wants an opinion, and a list of
+     * what matches is not one. A message that produced no criterion is not a
+     * query either - it would be answered with everything on the shelf - and
+     * neither is a lone type word, which is prose: "write me a poem about an
+     * apartment" is not a request for every apartment here.
+     *
+     * @param array<string, mixed> $criteria
+     */
+    private function notAQuery(string $text, array $criteria): bool
+    {
+        if ($this->pack->matches('judgement', $text)) {
+            return true;
+        }
+
+        return $criteria === [] || (count($criteria) === 1 && isset($criteria['type']));
     }
 
     /**

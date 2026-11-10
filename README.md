@@ -13,13 +13,18 @@ visitor message
    ├── 1. capture      an email in the message becomes a lead            (no model)
    ├── 2. cap          after N messages, hand over to a human            (no model)
    ├── 3. quick rules  contact, hours, facts about the item in view      (no model)
-   ├── 4. search rules "3 bed under 2m in Marina" — from your catalogue  (no model)
+   ├── 4. search rules a stated filter, from your catalogue              (no model)
    ├── 5. model        optional; gets a small, validated tool menu only
    └── 6. fallback     files the question for your team, asks for email
 ```
 
 Each layer is cheaper than the next and the first that can answer ends the turn. That is
 the whole idea: the expensive thing runs only when nothing else could.
+
+Layer 4 takes only what it can settle on its own: a stated filter. "Which of these two is
+better" passes through to the model even when it names an area and a budget, because a
+list is not an opinion. With no model configured, layer 4 takes those questions anyway —
+a shortlist beats an apology.
 
 ---
 

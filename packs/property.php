@@ -47,7 +47,10 @@ return [
         ],
         'rent'  => '/\b(rent|rental|renting|per year|p\.a\.?|annual|monthly|per month)\b/i',
         'sale'  => '/\b(buy|buying|purchase|for sale|sales|own it)\b/i',
-        'type'  => '/\b(apartment|flat|villa|townhouse|penthouse|studio|office)\b/i',
+        // The plural belongs in the pattern: "apartments in Dubai Marina" that
+        // never matches does not filter to nothing, it filters to everything,
+        // and the villas get listed at someone who asked for apartments.
+        'type'  => '/\b(apartment|flat|villa|townhouse|penthouse|studio|office)s?\b/i',
         'area'  => '/\b(in|at|around|near|close to)\s+([a-z][a-z\s]{2,30})/i',
     ],
 
@@ -128,7 +131,11 @@ return [
     'agency' => [
         'contact' => '/\b(phone|call|contact|whatsapp|number|reach you|speak to)\b/i',
         'email'   => '/\b(e-?mail)\b/i',
-        'hours'   => '/\b(hours|open|opening|timings?|closed|weekend)\b/i',
+        // Typed, not proofread: "office hourss" and "our hrs" are the same
+        // question, so the stem has to survive the typo. The lookbehind stops "a
+        // 24 hours gym" from reading as opening times, and the phrases do the
+        // work a bare "open" used to do - "open to offers" is not about timings.
+        'hours'   => '/\b(timings?|(?<!\d )h[ou]*rs*|opening (?:hours?|time)|do you open|are you open|are you closed|what time do you (?:open|close)|kab khul|kitne baje)\b/i',
         'office'  => '/\b(office|address|located|location|based)\b/i',
         'areas'   => '/\b(which areas|what areas|areas do you|cover)\b/i',
     ],

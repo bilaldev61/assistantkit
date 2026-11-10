@@ -190,6 +190,71 @@ class AssistantTest extends TestCase
         $this->assertSame(['rule:greeting', 'rule:process'], $kinds);
     }
 
+    public function test_a_plural_type_word_still_filters_by_that_type(): void
+    {
+        $reply = $this->assistant()->reply('chat-1', 'apartments in dubai marina for sale');
+
+        // Visitors type the plural. A type word that never matches does not
+        // narrow to nothing, it drops the filter, and the villa arrives at
+        // someone who asked for apartments.
+        $this->assertSame('rule:search', $reply->kind);
+        $this->assertStringContainsString('2-bedroom apartment in Dubai Marina', $reply->text);
+        $this->assertStringNotContainsString('4-bedroom villa', $reply->text);
+    }
+
+    public function test_a_misspelt_hours_question_is_still_answered_from_config(): void
+    {
+        $model = new ScriptedModel('From the model.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'office hourss');
+
+        // The model has no way to know our timings, so a typo here costs a call
+        // and still returns a deferral.
+        $this->assertSame('rule:agency_hours', $reply->kind);
+        $this->assertStringContainsString('Saturday to Thursday', $reply->text);
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_hours_used_as_a_measurement_is_not_answered_with_opening_times(): void
+    {
+        $reply = $this->assistant()->reply('chat-1', 'is there a 24 hours gym in the building');
+
+        $this->assertNotSame('rule:agency_hours', $reply->kind);
+        $this->assertStringNotContainsString('Saturday to Thursday', $reply->text);
+    }
+
+    public function test_a_judgement_that_names_filters_still_reaches_the_model(): void
+    {
+        $model = new ScriptedModel('The Marina one lives better with children.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'compare a 2 bedroom in marina with a 3 bedroom in downtown');
+
+        // The filters are real, but the visitor asked for an opinion: listing
+        // what matches answers a question nobody asked.
+        $this->assertSame('ai', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_a_lone_type_word_is_not_answered_as_a_search(): void
+    {
+        $model = new ScriptedModel('Four lines, none of them a listing.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'write me a poem about an apartment');
+
+        $this->assertSame('ai', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_a_judgement_is_shortlisted_when_no_model_is_available(): void
+    {
+        // With nothing behind the layer the strictness is off: an opinion is
+        // impossible either way, but the matching listings are still true.
+        $reply = $this->assistant()->reply('chat-1', 'which 2 bedroom in marina is worth buying');
+
+        $this->assertSame('rule:search', $reply->kind);
+        $this->assertStringContainsString('2-bedroom apartment in Dubai Marina', $reply->text);
+    }
+
     /** @param array<string, mixed> $overrides */
     private function assistant(?LanguageModel $model = null, array $overrides = []): Assistant
     {

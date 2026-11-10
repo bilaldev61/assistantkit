@@ -118,5 +118,24 @@ return [
             'kind'     => 'fallback',
             'missing'  => 'Night',
         ],
+        [
+            // Typed, not proofread. The model could not answer this one anyway.
+            'ask'      => 'office hourss',
+            'kind'     => 'rule:agency_hours',
+            'contains' => 'Saturday to Thursday',
+        ],
+        [
+            // "24 hours" measures a gym, not our timings.
+            'ask'     => 'is there a 24 hours gym in the building',
+            'kind'    => 'fallback',
+            'missing' => 'Saturday to Thursday',
+        ],
+        [
+            // The plural is the word visitors use; losing the filter would put
+            // the villa in front of someone who asked for apartments.
+            'ask'     => 'apartments in dubai marina for sale',
+            'kind'    => 'rule:search',
+            'missing' => '4-bedroom villa',
+        ],
     ],
 ];

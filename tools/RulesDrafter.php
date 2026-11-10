@@ -348,7 +348,7 @@ final class RulesDrafter
         return [
             'contact' => '/\b(phone|call|contact|whatsapp|reach you|speak to)\b/i',
             'email'   => '/\b(e-?mail)\b/i',
-            'hours'   => '/\b(hours|open|opening|timings?|closed|weekend)\b/i',
+            'hours'   => '/\b(timings?|(?<!\d )h[ou]*rs*|opening (?:hours?|time)|do you open|are you open|are you closed|what time do you (?:open|close))\b/i',
             'office'  => '/\b(office|address|located|location|where are you|based)\b/i',
             'areas'   => '/\b(which areas|what areas|areas do you|cover)\b/i',
         ];

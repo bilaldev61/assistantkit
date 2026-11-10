@@ -102,11 +102,16 @@ final class Assistant
             return $reply;
         }
 
-        if ($reply = $this->search->answer($conversation, $message)) {
+        // The listing layer is stricter when a model is waiting behind it: a
+        // stated filter is a query the shelf can answer for free, while an
+        // opinion or a message with nothing to filter on belongs to the model.
+        $modelUp = $this->model !== null && $this->model->isAvailable();
+
+        if ($reply = $this->search->answer($conversation, $message, aheadOfModel: $modelUp)) {
             return $reply;
         }
 
-        if ($this->model !== null && $this->model->isAvailable()) {
+        if ($modelUp) {
             if ($reply = $this->viaModel($conversation, $item, $facts)) {
                 return $reply;
             }

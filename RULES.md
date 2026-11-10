@@ -56,6 +56,11 @@ pattern in the pack and a fact from your data, or it says so and asks for an ema
 | `intents` | `greeting`, `thanks`, `search`, `judgement` | short, narrow regexes |
 | `tools` | the allowlist of actions this trade may use | `['search_items', 'get_item', 'save_lead', 'record_unanswered_question']` |
 
+`judgement` is the intent the listing layer reads: a compare-or-recommend question stays
+with the model even when it carries real filters, because the shelf can say *what
+matches*, never *which is better*. A lone type word is treated the same way — "write me a
+poem about an apartment" is not a request for every apartment on the shelf.
+
 ### The `facts` block is the heart of it
 
 ```php
@@ -209,6 +214,9 @@ edit one line, ask again.
 | One tool doing two things | the model picks the wrong one | one verb per tool |
 | 15 tools on a small model | worse answers, more cost | 4–8 tools; put the rest in `process` |
 | Pack copied but nobody edited it | polite, generic, useless | ten real questions first |
+| Type words written in one number only | "apartments" drops the filter and the whole shelf is shown | put the plural inside the pattern: `(apartment|flat)s?` |
+| A rule that demands correct spelling | "office hourss" costs a model call and still gets no answer | match the stem (`h[ou]*rs*`), not the dictionary word |
+| A search rule that fires on any mention of a noun | "a poem about an apartment" is answered with listings | a judgement, or nothing to filter on, goes to the model instead |
 
 ---
 
