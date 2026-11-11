@@ -7,7 +7,7 @@ namespace AssistantKit\Value;
  * reportable: "how many answers came from rules, and how many needed the model".
  *
  * Known kinds: lead, limit, fallback, ai, rule:<intent>, rule:fact_<key>,
- * rule:deferral, rule:process, rule:search, rule:search_none.
+ * rule:deferral, rule:process, rule:search, rule:search_none, rule:repeat.
  */
 final class Reply
 {

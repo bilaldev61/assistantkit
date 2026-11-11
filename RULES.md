@@ -195,6 +195,7 @@ Every reply prints its `kind`. That one word tells you which layer answered:
 | `rule:search_none` | filter found nothing | too narrow, or a rule that should defer instead |
 | `rule:process` | config steps were read | edit the words in config |
 | `rule:agency_contact` | brand field quoted | edit `brand` |
+| `rule:repeat` | the same sentence arrived twice | the visitor is stuck; the reply asks them to rephrase |
 | `ai` | the model answered | a rule is missing — add it to the pack |
 | `fallback` | nobody could answer | the question is now in `questions()`, your to-do list |
 

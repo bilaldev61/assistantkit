@@ -12,18 +12,19 @@ name and an email so no lead is lost.
 visitor message
    ├── 1. capture      an email in the message becomes a lead            (no model)
    ├── 2. cap          after N messages, hand over to a human            (no model)
-   ├── 3. quick rules  contact, hours, facts about the item in view      (no model)
-   ├── 4. search rules a stated filter, from your catalogue              (no model)
-   ├── 5. model        optional; gets a small, validated tool menu only
-   └── 6. fallback     files the question for your team, asks for email
+   ├── 3. repeat       the same sentence again gets a different reply    (no model)
+   ├── 4. quick rules  contact, hours, facts about the item in view      (no model)
+   ├── 5. search rules a stated filter, from your catalogue              (no model)
+   ├── 6. model        optional; gets a small, validated tool menu only
+   └── 7. fallback     files the question for your team, asks for email
 ```
 
 Each layer is cheaper than the next and the first that can answer ends the turn. That is
 the whole idea: the expensive thing runs only when nothing else could.
 
-Layer 4 takes only what it can settle on its own: a stated filter. "Which of these two is
+Layer 5 takes only what it can settle on its own: a stated filter. "Which of these two is
 better" passes through to the model even when it names an area and a budget, because a
-list is not an opinion. With no model configured, layer 4 takes those questions anyway —
+list is not an opinion. With no model configured, layer 5 takes those questions anyway —
 a shortlist beats an apology.
 
 ---
@@ -53,8 +54,8 @@ Prefer a terminal?
 php bin/demo.php                                    # scripted conversation, prints every kind
 php bin/rules.php lint                              # is this pack sane?
 php bin/rules.php ask "how much is it?" --item=marina-2br
-php bin/rules.php cases                             # 22 expected answers, replayed
-php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 58 tests, no setup
+php bin/rules.php cases                             # 28 expected answers, replayed
+php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 73 tests, no setup
 ```
 
 Starting a brand-new site with no rules yet? Draft them instead of facing a blank page:
@@ -182,7 +183,7 @@ per IP, verify the item slug exists, and never let a visitor string reach HTML. 
 
 ```
 src/                 the engine — no framework, no dependencies
-  Assistant.php        capture → cap → quick rules → search rules → model → fallback
+  Assistant.php        capture → cap → repeat → quick rules → search rules → model → fallback
   Contracts/           Catalogue, ConversationStore, LeadSink, LanguageModel
   Rules/               QuickAnswers (regex), RulesSearch (catalogue queries)
   Capture/             ContactCapture (name / email / phone from a sentence)

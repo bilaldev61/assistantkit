@@ -18,7 +18,7 @@ use AssistantKit\Value\Conversation;
 use AssistantKit\Value\Reply;
 
 /**
- * The whole engine, in the order it runs: capture, cap, rules, model, fallback.
+ * The whole engine, in the order it runs: capture, cap, repeat, rules, model, fallback.
  * Each layer is cheaper than the one after it, and the first layer that can
  * answer ends the turn.
  */
@@ -98,6 +98,12 @@ final class Assistant
             return new Reply($this->ask('handoff'), 'limit');
         }
 
+        // Asking again means the answer missed, not that it was not heard.
+        // Saying the same thing twice costs a whole prompt and changes nothing.
+        if ($this->repeats($conversation, $message)) {
+            return new Reply($this->repeated($conversation), 'rule:repeat');
+        }
+
         if ($reply = $this->quick->answer($conversation, $message, $facts)) {
             return $reply;
         }
@@ -154,6 +160,43 @@ final class Assistant
         }
 
         return new Reply($text, 'ai');
+    }
+
+    /**
+     * The same sentence sent again, with a reply already between the two.
+     *
+     * Only the words decide it, so capitals and punctuation do not buy a second
+     * model call. Small talk is left alone.
+     */
+    private function repeats(Conversation $conversation, string $message): bool
+    {
+        if ($this->quick->isSmallTalk($message)) {
+            return false;
+        }
+
+        // Oldest first: the message before the reply, the reply, then this one.
+        $recent = array_slice($conversation->messages, -3);
+
+        if (count($recent) < 3
+            || $recent[0]['role'] !== 'user'
+            || $recent[1]['role'] !== 'assistant'
+            || $recent[2]['role'] !== 'user') {
+            return false;
+        }
+
+        $word = Text::fingerprint($message);
+
+        return $word !== '' && $word === Text::fingerprint((string) $recent[0]['content']);
+    }
+
+    /** The second identical message gets a different reply, not the same one again. */
+    private function repeated(Conversation $conversation): string
+    {
+        $text = 'I have already answered that just above.';
+
+        return $conversation->isLead()
+            ? $text . ' If that was not it, ' . $this->from('agent') . ' has your details and will come back to you on it.'
+            : $text . ' If that was not it, say it a different way, or ' . mb_strtolower($this->ask('details'));
     }
 
     private function fallback(Conversation $conversation): string

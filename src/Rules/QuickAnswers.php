@@ -53,6 +53,21 @@ final class QuickAnswers
         return null;
     }
 
+    /**
+     * A hello or a thanks on its own - small talk rather than a question.
+     *
+     * The repeat guard uses it: a visitor saying hello twice is not stuck on an
+     * answer, so their second hello still gets a hello back.
+     */
+    public function isSmallTalk(string $message): bool
+    {
+        $text = Text::normalise($message);
+        $words = count(Text::words($text));
+
+        return ($words <= 8 && $this->pack->matches('thanks', $text))
+            || ($words <= 6 && $this->pack->matches('greeting', $text));
+    }
+
     private function agency(string $text): ?Reply
     {
         $brand = (array) ($this->config['brand'] ?? []);

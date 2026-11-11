@@ -50,4 +50,13 @@ final class Text
     {
         return preg_split('/[^\p{L}\p{N}]+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
     }
+
+    /**
+     * The words alone: case, spacing and punctuation do not make a message a
+     * different one. Used to spot a visitor asking the same thing twice.
+     */
+    public static function fingerprint(string $text): string
+    {
+        return implode(' ', self::words(mb_strtolower($text)));
+    }
 }

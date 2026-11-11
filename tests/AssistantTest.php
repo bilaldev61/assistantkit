@@ -289,6 +289,81 @@ class AssistantTest extends TestCase
         $this->assertSame([], $model->prompts);
     }
 
+    public function test_a_repeated_message_does_not_reach_the_model(): void
+    {
+        $model = new ScriptedModel('Downtown is quieter, Marina is busier.');
+        $assistant = $this->assistant($model);
+
+        $assistant->reply('chat-1', 'which area is better for families');
+        $reply = $assistant->reply('chat-1', 'which area is better for families');
+
+        $this->assertSame('rule:repeat', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+        $this->assertStringContainsString('already answered', $reply->text);
+    }
+
+    public function test_a_different_question_after_a_reply_is_not_a_repeat(): void
+    {
+        $model = new ScriptedModel('Downtown is quieter, Marina is busier.');
+        $assistant = $this->assistant($model);
+
+        $assistant->reply('chat-1', 'which area is better for families');
+        $reply = $assistant->reply('chat-1', 'what nationality is the owner');
+
+        // The guard compares this message with the one before the reply. Read
+        // the wrong end of the transcript and it compares it with itself, so
+        // every question after the first looks like a repeat.
+        $this->assertSame('ai', $reply->kind);
+        $this->assertCount(2, $model->prompts);
+    }
+
+    public function test_punctuation_and_capitals_do_not_make_it_a_new_question(): void
+    {
+        $model = new ScriptedModel('Downtown is quieter, Marina is busier.');
+        $assistant = $this->assistant($model);
+
+        $assistant->reply('chat-1', 'which area is better for families');
+        $reply = $assistant->reply('chat-1', 'Which area is better for families??');
+
+        $this->assertSame('rule:repeat', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_a_repeated_hello_is_still_a_hello(): void
+    {
+        $assistant = $this->assistant();
+
+        $assistant->reply('chat-1', 'hello');
+        $reply = $assistant->reply('chat-1', 'hello');
+
+        $this->assertSame('rule:greeting', $reply->kind);
+    }
+
+    public function test_a_repeat_does_not_file_the_question_twice(): void
+    {
+        $assistant = $this->assistant();
+
+        $assistant->reply('chat-1', 'what nationality is the owner');
+        $reply = $assistant->reply('chat-1', 'what nationality is the owner');
+
+        $this->assertSame('rule:repeat', $reply->kind);
+        $this->assertCount(1, $this->store->questions($this->store->load('chat-1')));
+    }
+
+    public function test_a_lead_is_not_asked_for_details_again(): void
+    {
+        $model = new ScriptedModel('Downtown is quieter, Marina is busier.');
+        $assistant = $this->assistant($model);
+
+        $assistant->reply('chat-1', 'sara@example.com');
+        $assistant->reply('chat-1', 'which area is better for families');
+        $reply = $assistant->reply('chat-1', 'which area is better for families');
+
+        $this->assertSame('rule:repeat', $reply->kind);
+        $this->assertStringNotContainsString('Leave your name', $reply->text);
+        $this->assertStringContainsString('has your details', $reply->text);
+    }
+
     /** @param array<string, mixed> $overrides */
     private function assistant(?LanguageModel $model = null, array $overrides = []): Assistant
     {
