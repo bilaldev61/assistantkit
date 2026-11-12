@@ -105,7 +105,7 @@ final class ToolTemplatesTest extends TestCase
 
     public function test_quote_requests_never_carry_a_price(): void
     {
-        $seen = null;
+        $seen = [];
         $tool = (new RequestQuoteTool(function (array $input) use (&$seen): array {
             $seen = $input;
 
