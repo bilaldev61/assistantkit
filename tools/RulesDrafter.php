@@ -362,6 +362,10 @@ final class RulesDrafter
             'thanks'    => '/\b(thanks|thank you|appreciate it|got it)\b/i',
             'search'    => '/\b(looking for|do you have|show me|options|available|list)\b/i',
             'judgement' => '/\b(compare|better|best|recommend|should i|why|worth it)\b/i',
+            // Universal words, so a drafted pack gets them for free. in_scope is
+            // the trade's own vocabulary and cannot be drafted: lint says so.
+            'trust'     => '/\b(scam|fraud\w*|cheating|legit|legitimate|trustworthy|dodgy|shady)\b|\b(?:you|u|your|agency|company|business)\b[^.?!]{0,30}\b(licen[cs]e[ds]?|registered|registration)\b/i',
+            'distress'  => '/\b(kidnap\w*|abduct\w*|hostage|emergency|ambulance|police|999|911|in danger|help me|suicid\w*|kill (?:myself|me)|heart attack|trapped|threaten\w*|attacked|bleeding|dying)\b/i',
         ];
     }
 

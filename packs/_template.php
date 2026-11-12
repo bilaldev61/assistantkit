@@ -97,6 +97,17 @@ return [
         'identity'  => '/\b(?:are you|you(?:\'re| are)?)\s+(?:an?\s+|the\s+)?(?:real|human|person|ai|bot|robot|artificial|chat.?gpt|openai)\b|\b(?:who\s+(?:made|built|created)\s+you|what\s+are\s+you|is\s+this\s+(?:ai|a\s+bot|a\s+robot))\b/i',
         'search'    => '/\b(looking for|do you have|show me|any |options|list)\b/i',
         'judgement' => '/\b(compare|better|best|recommend|should i|why|worth it)\b/i',
+        // "Are you a scam?" / "are you registered?" - answered from
+        // brand.licence in config, never guessed. Blank licence, no claim.
+        'trust'     => '/\b(scam|fraud\w*|looting|cheating|legit|legitimate|trustworthy|dodgy|shady)\b|\b(?:you|u|your|agency|company|business)\b[^.?!]{0,30}\b(licen[cs]e[ds]?|licen[cs]ing|registered|registration)\b/i',
+        // EDIT ME: the words of your trade. An allowlist, not a denylist - a
+        // visitor invents an off-topic question faster than banned topics can be
+        // named. Leave place names out: one place word must not switch the gate
+        // off for "are visas open".
+        'in_scope'  => '/\b(item|items|price|cost|budget|buy|buying|sell|sale|rent|rental|stock|available|size|order|delivery|warranty|discount|offer|booking|appointment)\b/i',
+        // A person in distress is not an off-topic visitor. Universal words:
+        // leave these as they are unless your trade needs more.
+        'distress'  => '/\b(kidnap\w*|abduct\w*|hostage|emergency|ambulance|police|999|911|in danger|help me|suicid\w*|kill (?:myself|me)|heart attack|trapped|threaten\w*|attacked|bleeding|dying)\b/i',
     ],
 
     /*

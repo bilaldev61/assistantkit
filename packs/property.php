@@ -149,5 +149,17 @@ return [
         'identity'  => '/\b(?:are you|you(?:\'re| are)?)\s+(?:an?\s+|the\s+)?(?:real|human|person|ai|bot|robot|artificial|chat.?gpt|openai)\b|\b(?:who\s+(?:made|built|created)\s+you|what\s+are\s+you|is\s+this\s+(?:ai|a\s+bot|a\s+robot))\b/i',
         'search'    => '/\b(looking for|do you have|show me|any |search|options|available|list)\b/i',
         'judgement' => '/\b(compare|better|best|recommend|should i|why|explain|difference|worth it|invest)\b/i',
+        // Is this business real and licensed? A registration is a legal claim
+        // made in the company's name, so it is answered from brand.licence in
+        // config and never inferred. Add your own brand name to the subjects.
+        'trust'     => '/\b(scam|fraud\w*|looting|cheating|legit|legitimate|trustworthy|dodgy|shady)\b|\b(?:you|u|your|agency|company|business)\b[^.?!]{0,30}\b(licen[cs]e[ds]?|licen[cs]ing|registered|registration|rera|orn)\b|\b(?:rera|orn|trade)\s+(?:number|no|licen[cs]e|registration|certificate)\b/i',
+        // What makes a message worth a model call. An allowlist, not a denylist:
+        // a visitor invents an off-topic question faster than a list of banned
+        // topics can name it. Place names are deliberately absent - "dubai visas"
+        // is about visas, and one place word must not switch the gate off.
+        'in_scope'  => '/\b(house|villa|home|ghar|plot|land|flat|apartment|townhouse|property|properties|penthouse|studio|marla|kanal|crore|lakh|aed|dirham|price|cost|budget|rent|rental|buy|buying|sell|sale|listing|listings|bed|bath|room|sq ?ft|square (?:feet|foot)|area|areas|community|suburb|neighbou?rhood|nearby|owner|seller|landlord|developer|tenant|agent|agency|broker|viewing|visit|inspection|offer|negotiat\w*|discount|mortgage|loan|instal+ments?|title|deed|noc|ejari|oqood|dld|rera|orn|permit|licen[cs]e\w*|registered|registration|service charge|maintenance|dewa|handover|possession|completion|off ?plan|furnish\w*|parking|garage|balcony|gym|pool|school|metro|mall|hospital|beach|park|airport|cheaper|similar|suggest)\b/i',
+        // A person in distress is not an off-topic visitor, and no commercial
+        // scope rule should talk over them. The gate stands down for the thread.
+        'distress'  => '/\b(kidnap\w*|abduct\w*|hostage|emergency|ambulance|police|999|911|in danger|help me|suicid\w*|kill (?:myself|me)|heart attack|trapped|threaten\w*|attacked|bleeding|dying)\b/i',
     ],
 ];

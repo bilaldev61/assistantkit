@@ -15,7 +15,7 @@ visitor message
    ├── 3. repeat       the same sentence again gets a different reply    (no model)
    ├── 4. quick rules  contact, hours, facts about the item in view      (no model)
    ├── 5. search rules a stated filter, from your catalogue              (no model)
-   ├── 6. model        optional; gets a small, validated tool menu only
+   ├── 6. model        optional; scope gate first, then a small tool menu
    └── 7. fallback     files the question for your team, asks for email
 ```
 
@@ -26,6 +26,11 @@ Layer 5 takes only what it can settle on its own: a stated filter. "Which of the
 better" passes through to the model even when it names an area and a budget, because a
 list is not an opinion. With no model configured, layer 5 takes those questions anyway —
 a shortlist beats an apology.
+
+Layer 6 asks one question before it spends anything: is this message even about your trade?
+"Who is the current prime minister" is declined by the rules for free. The gate stands down
+when an item is open, when the message is a short follow-up, and for anyone in distress — a
+person asking for emergency help is not an off-topic visitor.
 
 ---
 
@@ -47,6 +52,7 @@ Open <http://localhost:8099/> and talk to the bubble. No key, no database, nothi
 | "how does renting work?" | your process steps from config |
 | "Ahmed Khan, ahmed@example.com" | a lead, with the question attached |
 | "can you hold it for my cousin?" | filed for the team, fallback reply |
+| "are you a scam?" | it will not invent a licence — the team confirms |
 
 Prefer a terminal?
 
@@ -54,8 +60,8 @@ Prefer a terminal?
 php bin/demo.php                                    # scripted conversation, prints every kind
 php bin/rules.php lint                              # is this pack sane?
 php bin/rules.php ask "how much is it?" --item=marina-2br
-php bin/rules.php cases                             # 28 expected answers, replayed
-php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 73 tests, no setup
+php bin/rules.php cases                             # 30 expected answers, replayed
+php /path/to/any/vendor/bin/phpunit -c phpunit.xml  # the suite: 86 tests, no setup
 ```
 
 Starting a brand-new site with no rules yet? Draft them instead of facing a blank page:
@@ -183,7 +189,7 @@ per IP, verify the item slug exists, and never let a visitor string reach HTML. 
 
 ```
 src/                 the engine — no framework, no dependencies
-  Assistant.php        capture → cap → repeat → quick rules → search rules → model → fallback
+  Assistant.php        capture → cap → repeat → quick rules → search rules → scope → model → fallback
   Contracts/           Catalogue, ConversationStore, LeadSink, LanguageModel
   Rules/               QuickAnswers (regex), RulesSearch (catalogue queries)
   Capture/             ContactCapture (name / email / phone from a sentence)

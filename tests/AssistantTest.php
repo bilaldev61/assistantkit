@@ -364,6 +364,166 @@ class AssistantTest extends TestCase
         $this->assertStringContainsString('has your details', $reply->text);
     }
 
+    public function test_an_off_topic_question_is_declined_without_the_model(): void
+    {
+        $model = new ScriptedModel('The Ruler of Dubai is Sheikh Mohammed.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'who is the current prime minister of the uae');
+
+        // A prompt here buys a polite decline at full price, and the model may
+        // answer it instead of declining. Neither is worth the tokens.
+        $this->assertSame('rule:off_topic', $reply->kind);
+        $this->assertSame([], $model->prompts);
+        $this->assertStringContainsString('properties', $reply->text);
+    }
+
+    public function test_an_off_topic_question_that_names_a_place_is_still_declined(): void
+    {
+        $model = new ScriptedModel('Yes, visas are open.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'are dubai visas open for visitors right now');
+
+        // The old gate was a denylist vetoed by any property word, and "dubai"
+        // was one of them - so naming the city switched the gate off.
+        $this->assertSame('rule:off_topic', $reply->kind);
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_a_trust_question_never_claims_a_registration(): void
+    {
+        $model = new ScriptedModel('We are a licensed agency, check our RERA registration.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'i think this is a scam, are you even registered?');
+
+        // brand.licence is blank, so there is no registration to claim. This is
+        // the one answer where a guess is a legal claim made in the owner's name.
+        $this->assertSame('rule:agency_trust', $reply->kind);
+        $this->assertSame([], $model->prompts);
+        $this->assertStringContainsString('will not guess', $reply->text);
+        $this->assertStringNotContainsString('registered under', $reply->text);
+        $this->assertStringNotContainsString('licensed', $reply->text);
+        $this->assertStringContainsString('name and email', $reply->text);
+    }
+
+    public function test_a_licence_question_quotes_only_the_registration_on_record(): void
+    {
+        $model = new ScriptedModel('Should not run.');
+        $assistant = $this->assistant($model, ['brand' => ['licence' => 'ORN 12345']]);
+
+        $reply = $assistant->reply('chat-1', 'are you rera registered?');
+
+        $this->assertSame('rule:agency_trust', $reply->kind);
+        $this->assertStringContainsString('ORN 12345', $reply->text);
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_the_trust_rule_does_not_ask_a_lead_for_details_again(): void
+    {
+        $assistant = $this->assistant();
+
+        $assistant->reply('chat-1', 'sara@example.com');
+        $reply = $assistant->reply('chat-1', 'is your company legit?');
+
+        $this->assertSame('rule:agency_trust', $reply->kind);
+        $this->assertStringNotContainsString('Leave your name', $reply->text);
+        $this->assertStringContainsString('I have your details', $reply->text);
+    }
+
+    public function test_a_short_follow_up_still_reaches_the_model(): void
+    {
+        $model = new ScriptedModel('It faces the park.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'tell me more');
+
+        // Three words carry no topic of their own. Gating them would cut the
+        // visitor off mid-conversation, and the model has the history.
+        $this->assertSame('ai', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_a_question_with_an_item_open_is_never_gated(): void
+    {
+        $model = new ScriptedModel('From the model.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'who is the current prime minister of the uae', 'marina-2br');
+
+        // On an item page every question is about that item until the visitor
+        // says otherwise, so there is nothing here to gate.
+        $this->assertSame('ai', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_distress_reaches_the_model_and_stands_the_gate_down_for_the_thread(): void
+    {
+        $model = new ScriptedModel('Call 999 now.');
+        $assistant = $this->assistant($model);
+
+        $first = $assistant->reply('chat-1', 'i am kidnapped, please help me');
+        $second = $assistant->reply('chat-1', 'what is the current prime minister of the uae');
+
+        // A person in distress is not an off-topic visitor, and a later message
+        // in that same thread is not a new visitor either. No commercial scope
+        // rule should talk over an emergency.
+        $this->assertSame('ai', $first->kind);
+        $this->assertSame('ai', $second->kind);
+        $this->assertCount(2, $model->prompts);
+    }
+
+    public function test_the_gate_is_off_when_config_says_so(): void
+    {
+        $model = new ScriptedModel('From the model.');
+        $assistant = $this->assistant($model, ['scope' => ['gate' => false]]);
+
+        $reply = $assistant->reply('chat-1', 'who is the current prime minister of the uae');
+
+        $this->assertSame('ai', $reply->kind);
+        $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_an_off_topic_message_still_gets_a_way_to_a_person_with_no_model(): void
+    {
+        $reply = $this->assistant()->reply('chat-1', 'who is the current prime minister of the uae');
+
+        // The gate exists to save a model call. With no model there is nothing
+        // to save, and the fallback still leaves the visitor a way to a person.
+        $this->assertSame('fallback', $reply->kind);
+        $this->assertStringContainsString('name and email', $reply->text);
+    }
+
+    public function test_the_prompt_forbids_licence_and_legal_claims(): void
+    {
+        $model = new ScriptedModel('Downtown is quieter.');
+
+        $this->assistant($model)->reply('chat-1', 'which area is better for families');
+
+        $this->assertCount(1, $model->prompts);
+        $this->assertStringContainsString('No legal, tax or investment advice', $model->prompts[0]);
+        $this->assertStringContainsString('Never state or imply anything about this company', $model->prompts[0]);
+        $this->assertStringContainsString('one short polite decline', $model->prompts[0]);
+    }
+
+    public function test_a_bare_quantifier_does_not_switch_the_gate_off(): void
+    {
+        $model = new ScriptedModel('Flights are operating normally.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'is flights are being cnecel any threats from iran???');
+
+        // The search intent matches a bare "any", and reading that as a search
+        // let a question about Iran buy a model call.
+        $this->assertSame('rule:off_topic', $reply->kind);
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_a_budget_is_not_declined_as_off_topic(): void
+    {
+        $model = new ScriptedModel('From the model.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'anything under 5 million');
+
+        // No trade word anywhere in it, but a number makes it a budget.
+        $this->assertNotSame('rule:off_topic', $reply->kind);
+    }
+
     /** @param array<string, mixed> $overrides */
     private function assistant(?LanguageModel $model = null, array $overrides = []): Assistant
     {

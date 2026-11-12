@@ -18,9 +18,12 @@ use AssistantKit\Value\Conversation;
 use AssistantKit\Value\Reply;
 
 /**
- * The whole engine, in the order it runs: capture, cap, repeat, rules, model, fallback.
- * Each layer is cheaper than the one after it, and the first layer that can
- * answer ends the turn.
+ * The whole engine, in the order it runs: capture, cap, repeat, rules, scope,
+ * model, fallback. Each layer is cheaper than the one after it, and the first
+ * layer that can answer ends the turn.
+ *
+ * The scope gate only runs when a model is waiting: with no model there is no
+ * call to save, and the fallback still leaves the visitor a way to a person.
  */
 final class Assistant
 {
@@ -118,6 +121,12 @@ final class Assistant
         }
 
         if ($modelUp) {
+            // Nothing above could answer it and it is not about this trade, so a
+            // prompt would buy a polite decline at full price. Say it for nothing.
+            if ($this->quick->isOffTopic($conversation, $message)) {
+                return $this->quick->offTopic();
+            }
+
             if ($reply = $this->viaModel($conversation, $item, $facts)) {
                 return $reply;
             }

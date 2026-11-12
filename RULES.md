@@ -53,13 +53,24 @@ pattern in the pack and a fact from your data, or it says so and asks for an ema
 | `facts` | recognised questions, in priority order | see below |
 | `process` | "how does it work" topics → config steps | `'renting' => '/\brent\|tenancy\b/i'` |
 | `agency` | questions about you → brand fields in config | `'contact' => '/\bphone\|call\b/i'` |
-| `intents` | `greeting`, `thanks`, `search`, `judgement` | short, narrow regexes |
+| `intents` | `greeting`, `thanks`, `identity`, `search`, `judgement`, `trust`, `in_scope`, `distress` | short, narrow regexes |
 | `tools` | the allowlist of actions this trade may use | `['search_items', 'get_item', 'save_lead', 'record_unanswered_question']` |
 
 `judgement` is the intent the listing layer reads: a compare-or-recommend question stays
 with the model even when it carries real filters, because the shelf can say *what
 matches*, never *which is better*. A lone type word is treated the same way — "write me a
 poem about an apartment" is not a request for every apartment on the shelf.
+
+`trust` answers "are you a scam?" and "are you registered?" from `brand.licence` in config.
+Leave that blank and the assistant says it cannot verify and offers to have the team send
+the details — it never invents a registration. A licence number is a legal claim made in
+your name, so it is the one fact that must come from you and not from a model.
+
+`in_scope` and `distress` drive the gate in front of the model. `in_scope` is an
+**allowlist**: the words of your trade. A denylist of banned topics always misses the next
+question a visitor invents, and one place word in it ("dubai") switches the whole gate off
+for "are dubai visas open". `distress` stands the gate down for the entire thread, because a
+person asking for emergency help is not an off-topic visitor.
 
 ### The `facts` block is the heart of it
 
@@ -196,6 +207,8 @@ Every reply prints its `kind`. That one word tells you which layer answered:
 | `rule:process` | config steps were read | edit the words in config |
 | `rule:agency_contact` | brand field quoted | edit `brand` |
 | `rule:repeat` | the same sentence arrived twice | the visitor is stuck; the reply asks them to rephrase |
+| `rule:agency_trust` | asked whether you are real or licensed | put the real registration in `brand.licence`, or leave it blank |
+| `rule:off_topic` | not about your trade | widen `in_scope` if the question really was yours |
 | `ai` | the model answered | a rule is missing — add it to the pack |
 | `fallback` | nobody could answer | the question is now in `questions()`, your to-do list |
 
@@ -218,6 +231,8 @@ edit one line, ask again.
 | Type words written in one number only | "apartments" drops the filter and the whole shelf is shown | put the plural inside the pattern: `(apartment|flat)s?` |
 | A rule that demands correct spelling | "office hourss" costs a model call and still gets no answer | match the stem (`h[ou]*rs*`), not the dictionary word |
 | A search rule that fires on any mention of a noun | "a poem about an apartment" is answered with listings | a judgement, or nothing to filter on, goes to the model instead |
+| A denylist of off-topic topics | the next invented question gets a full-price answer | an allowlist of your own words (`in_scope`) |
+| A licence number written into the prompt | the model states a registration you do not have | `brand.licence`, blank until it is real |
 
 ---
 

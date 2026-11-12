@@ -158,5 +158,19 @@ return [
             'kind'     => 'rule:process',
             'contains' => 'viewings',
         ],
+        [
+            // A registration is a legal claim in the company's name. With no
+            // licence in config the answer must not invent one.
+            'ask'     => 'is this a scam, are you even registered?',
+            'kind'    => 'rule:agency_trust',
+            'missing' => 'registered under',
+        ],
+        [
+            // "your RERA number" names a number: the contact rule must not
+            // answer it with a phone number.
+            'ask'      => 'what is your rera number',
+            'kind'     => 'rule:agency_trust',
+            'contains' => 'will not guess',
+        ],
     ],
 ];

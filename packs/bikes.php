@@ -90,5 +90,8 @@ return [
         'thanks' => '~\\bthanks\\b|\\bthank you\\b|\\bappreciate it\\b~i',
         'search' => '~\\blooking for\\b|\\bdo you have\\b|\\bshow me\\b|\\boptions\\b~i',
         'judgement' => '~\\bcompare\\b|\\bbetter\\b|\\bbest\\b|\\brecommend\\b|\\bshould i\\b~i',
+        'trust' => '/\\b(scam|fraud\\w*|cheating|legit|legitimate|trustworthy|dodgy|shady)\\b|\\b(?:you|u|your|shop|store|company|business)\\b[^.?!]{0,30}\\b(licen[cs]e[ds]?|licen[cs]ing|registered|registration)\\b/i',
+        'in_scope' => '/\\b(bike|bikes|bicycle|cycle|road|mtb|mountain|hybrid|gravel|frame|fork|wheel|wheels|tyre|tire|tubeless|gear|gears|groupset|brake|brakes|disc|saddle|handlebar|pedal|chain|cassette|crank|helmet|size|sizing|fit|price|cost|budget|aed|buy|buying|sell|sale|rent|rental|hire|stock|available|delivery|deliver|shipping|warranty|finance|instalments|installments|discount|offer|service|servicing|tune up|shop|store|order|orders|cheaper|similar|suggest)\\b/i',
+        'distress' => '/\\b(kidnap\\w*|abduct\\w*|hostage|emergency|ambulance|police|999|911|in danger|help me|suicid\\w*|kill (?:myself|me)|heart attack|trapped|threaten\\w*|attacked|bleeding|dying)\\b/i',
     ],
 ];

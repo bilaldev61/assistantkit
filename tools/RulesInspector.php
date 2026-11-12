@@ -18,7 +18,7 @@ final class RulesInspector
 
     private const AGENCY_KEYS = ['contact', 'email', 'hours', 'office', 'areas'];
 
-    private const INTENT_KEYS = ['greeting', 'thanks', 'identity', 'search', 'judgement'];
+    private const INTENT_KEYS = ['greeting', 'thanks', 'identity', 'search', 'judgement', 'trust', 'in_scope', 'distress'];
 
     /** @param array<string, mixed> $config */
     public function __construct(

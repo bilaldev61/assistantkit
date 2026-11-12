@@ -14,6 +14,9 @@ return [
         'hours'    => 'Saturday to Thursday, 9am to 6pm',
         'office'   => 'Office 101, Example Tower, Dubai',
         'areas'    => ['Dubai Marina', 'Jumeirah Village Circle', 'Downtown Dubai'],
+        // Leave blank until you have a real registration to show. Blank means
+        // the assistant never claims one - it offers to have the team send it.
+        'licence'  => '',
     ],
 
     /*
@@ -58,6 +61,15 @@ return [
         'max_messages'       => 30,  // visitor messages before a hand-off
         'questions_per_chat' => 5,   // questions filed as unanswered per chat
         'results'            => 6,   // rows listed in a search answer
+    ],
+
+    /*
+     | The last gate before a model call. A message nothing else could answer,
+     | and that is not about this trade, is declined for free rather than paying
+     | for a polite refusal. false leaves every message to the model.
+     */
+    'scope' => [
+        'gate' => true,
     ],
 
     // :agent and :brand are replaced from brand above.

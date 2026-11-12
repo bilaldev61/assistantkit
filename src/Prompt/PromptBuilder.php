@@ -39,6 +39,14 @@ final class PromptBuilder
                 . ', hours ' . ($brand['hours'] ?? 'unknown') . ', office ' . ($brand['office'] ?? 'unknown') . '.',
             '- If a visitor asks about fees, deposits, discounts or anything needing a judgement call, say the team'
                 . ' will confirm it rather than guessing.',
+            '- No legal, tax or investment advice. Never state what the law says - no offences, no penalties,'
+                . ' no what-is-legal. General process questions are fine to answer briefly, with a note that the'
+                . ' team can go through specifics.',
+            '- Never state or imply anything about this company\'s own licence, registration, permits, awards,'
+                . ' years in business or number of deals. You have not been given those facts. If asked, say the'
+                . ' team will confirm and offer to pass their details on.',
+            '- Only discuss ' . $many . ' and this company. Anything else - news, politics, visas, flights,'
+                . ' general knowledge - gets one short polite decline, not an answer.',
             '',
             'When you cannot answer:',
             '- Say so plainly and, in that same reply, ask for their name and email. Never end on an apology alone.',
