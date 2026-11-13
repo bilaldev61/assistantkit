@@ -14,6 +14,9 @@ final class ScriptedModel implements LanguageModel
     /** @var list<string> */
     public array $prompts = [];
 
+    /** @var list<list<array{role: string, content: string}>> */
+    public array $histories = [];
+
     public function __construct(
         private readonly ?string $answer = null,
         private readonly bool $available = true,
@@ -27,6 +30,7 @@ final class ScriptedModel implements LanguageModel
     public function converse(string $system, array $messages, array $tools, callable $runTool): string
     {
         $this->prompts[] = $system;
+        $this->histories[] = $messages;
 
         if ($this->answer === null) {
             return 'I am not sure about that.';

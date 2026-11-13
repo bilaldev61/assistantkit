@@ -42,6 +42,15 @@ file next to it. Delete that directory to start clean.
 To let the model answer the leftovers, implement `LanguageModel::converse()` against your
 provider and pass it as the sixth argument. Nothing else changes.
 
+## Rendering safely
+
+Replies are written with `textContent`, so the assistant's words are data, never markup:
+a reply cannot inject HTML or script. Keep it that way. If you extend the widget to turn
+URLs into links, allowlist the destinations — your own origin plus trusted hosts such as
+`wa.me` — and compare origins exactly (`new URL(href).origin === location.origin`), never by
+prefix. Render everything else as plain text. A link labelled "View listing" that points
+somewhere else is a phishing trap, and `innerHTML` on a reply is an XSS hole.
+
 ## What this is not
 
 It has no auth, no rate limiting, no history UI, no retention, no styling options. Copy
