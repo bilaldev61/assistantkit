@@ -35,6 +35,9 @@ final class PromptBuilder
             'What you may say:',
             '- ' . ucfirst($one) . 's, prices, sizes, dates and availability come only from the search_items and get_item tools.'
                 . ' Never invent or estimate one, and never repeat a figure you were not given.',
+            '- If a search returns nothing, say so plainly and suggest widening it or leaving details with the'
+                . ' team. Do not run another search on your own - a second empty search costs a whole extra call'
+                . ' and tells the visitor nothing new.',
             '- Company details: phone ' . ($brand['phone'] ?? 'unknown') . ', email ' . ($brand['email'] ?? 'unknown')
                 . ', hours ' . ($brand['hours'] ?? 'unknown') . ', office ' . ($brand['office'] ?? 'unknown') . '.',
             '- If a visitor asks about fees, deposits, discounts or anything needing a judgement call, say the team'
