@@ -69,6 +69,23 @@ class AssistantSecurityTest extends TestCase
         );
     }
 
+    public function test_model_item_urls_pass_through_ungrounded_the_host_must_verify(): void
+    {
+        // The engine deliberately does not ground model output: a host that
+        // linkifies replies owns the check. This locks that boundary so nobody
+        // assumes an invented item URL was filtered out before it arrives.
+        $text = "Try these:\n"
+            . "- [Marina 2-bed](https://example.com/properties/marina-2br)\n"
+            . '- [Canal view 3-bed](https://example.com/properties/canal-view-3-bed-invented)';
+        $assistant = $this->assistant(new ScriptedModel($text));
+
+        $reply = $assistant->reply('chat-2', 'which area is better for families');
+
+        $this->assertSame('ai', $reply->kind);
+        $this->assertSame($text, $reply->text);
+        $this->assertStringContainsString('canal-view-3-bed-invented', $reply->text);
+    }
+
     /** @param array<string, mixed> $overrides */
     private function assistant(?LanguageModel $model = null, array $overrides = []): Assistant
     {

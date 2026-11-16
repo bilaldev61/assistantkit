@@ -51,6 +51,14 @@ URLs into links, allowlist the destinations — your own origin plus trusted hos
 prefix. Render everything else as plain text. A link labelled "View listing" that points
 somewhere else is a phishing trap, and `innerHTML` on a reply is an XSS hole.
 
+The engine passes model text through untouched: it does not check whether a cited item
+exists. If you render item links, look up each slug in your catalogue before showing it,
+and strip markdown wrapping and trailing punctuation first — a real link written as
+`[title](url)` captures `slug)`, and a naive lookup judges it invented. Drop invented
+items with their title and price lines; if every cited item is invented, replace the
+whole reply with a rules answer. A guard that misreads real links does as much damage
+as no guard at all.
+
 ## What this is not
 
 It has no auth, no rate limiting, no history UI, no retention, no styling options. Copy
