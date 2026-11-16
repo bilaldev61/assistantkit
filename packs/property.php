@@ -146,6 +146,9 @@ return [
         // Trailing fillers ("ge", "ji") are sentence-final noise in South-Asian English.
         'greeting'  => '/^(?:hi+|h[ae]l+o+|hl+o*w?|hey+|hy+|hai|sala+m|slm|assalam[u]? ?o? ?alaikum|aoa|yo|good (?:morning|afternoon|evening|day))(?:\s+(?:ge|ji|yaar|sahab|sir|bhai|na|haan|bas|to))*\s*$/i',
         'thanks'    => '/\b(thanks|thank you|appreciate it|that helps|perfect|got it)\b/i',
+        // A bare acknowledgement answers the assistant's last offer. The repeat
+        // guard leaves it alone, so two yeses in a row are not one question re-asked.
+        'agreement' => '/^(?:yes+|yeah|yep|yup|sure|ok|okay|okey|please|pls|go ahead|why not)\b/i',
         'identity'  => '/\b(?:are you|you(?:\'re| are)?)\s+(?:an?\s+|the\s+)?(?:real|human|person|ai|bot|robot|artificial|chat.?gpt|openai)\b|\b(?:who\s+(?:made|built|created)\s+you|what\s+are\s+you|is\s+this\s+(?:ai|a\s+bot|a\s+robot))\b/i',
         'search'    => '/\b(looking for|do you have|show me|any |search|options|available|list)\b/i',
         'judgement' => '/\b(compare|better|best|recommend|should i|why|explain|difference|worth it|invest)\b/i',
@@ -158,6 +161,11 @@ return [
         // topics can name it. Place names are deliberately absent - "dubai visas"
         // is about visas, and one place word must not switch the gate off.
         'in_scope'  => '/\b(house|villa|home|ghar|plot|land|flat|apartment|townhouse|property|properties|penthouse|studio|marla|kanal|crore|lakh|aed|dirham|price|cost|budget|rent|rental|buy|buying|sell|sale|listing|listings|bed|bath|room|sq ?ft|square (?:feet|foot)|area|areas|community|suburb|neighbou?rhood|nearby|owner|seller|landlord|developer|tenant|agent|agency|broker|viewing|visit|inspection|offer|negotiat\w*|discount|mortgage|loan|instal+ments?|title|deed|noc|ejari|oqood|dld|rera|orn|permit|licen[cs]e\w*|registered|registration|service charge|maintenance|dewa|handover|possession|completion|off ?plan|furnish\w*|parking|garage|balcony|gym|pool|school|metro|mall|hospital|beach|park|airport|cheaper|similar|suggest)\b/i',
+        // Unambiguous non-trade intents - creative writing and general knowledge -
+        // declined before the item-open bypass, guarded by the allowlist above.
+        // Narrow on purpose: not a ban list of topics, only the phrasings that are
+        // never about property however they are dressed.
+        'off_topic' => '/\b(?:write|compose|create|make|generate|tell|give|sing)\b.{0,40}\b(?:story|poem|essay|joke|song|novel|fiction|tale|rhyme|script|limerick)\b|\b(?:who|whos|what|whats|when|where)\b.{0,40}\b(?:ruler|president|prime minister|king|queen|capital|population|weather|news|visa|flight|currency|language|religion)\b|\b(?:ruler|president|prime minister|king|queen)\s+of\b/i',
         // A person in distress is not an off-topic visitor, and no commercial
         // scope rule should talk over them. The gate stands down for the thread.
         'distress'  => '/\b(kidnap\w*|abduct\w*|hostage|emergency|ambulance|police|999|911|in danger|help me|suicid\w*|kill (?:myself|me)|heart attack|trapped|threaten\w*|attacked|bleeding|dying)\b/i',

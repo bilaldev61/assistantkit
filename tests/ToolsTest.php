@@ -158,10 +158,46 @@ final class ToolsTest extends TestCase
 
         $this->assertSame(1, count(array_keys($this->names($box->definitions()), 'save_lead')));
 
-        $box->run('save_lead', ['email' => 'ahmed@example.com'], new Conversation('c1'));
+        $conversation = new Conversation('c1');
+        $conversation->recordVisitor('ahmed@example.com');
+        $box->run('save_lead', ['email' => 'ahmed@example.com'], $conversation);
 
         $this->assertSame(0, $this->calls);
         $this->assertCount(1, $leads->leads);
+    }
+
+    public function test_save_lead_refuses_details_the_visitor_never_typed(): void
+    {
+        $leads = new MemoryLeadSink();
+        $box = new ToolBox(new FakeCatalogue(), $leads, new MemoryStore(), $this->pack(), $this->config());
+
+        $conversation = new Conversation('c1');
+        $conversation->recordVisitor('yes, please save my interest');
+
+        try {
+            $box->run('save_lead', ['name' => 'John', 'phone' => '1234567890', 'message' => 'wants a villa'], $conversation);
+            $this->fail('A fabricated lead was saved.');
+        } catch (ToolError $error) {
+            $this->assertStringContainsString('has not typed', $error->getMessage());
+        }
+
+        $this->assertCount(0, $leads->leads);
+        $this->assertNull($conversation->leadRef);
+    }
+
+    public function test_save_lead_saves_details_the_visitor_typed(): void
+    {
+        $leads = new MemoryLeadSink();
+        $box = new ToolBox(new FakeCatalogue(), $leads, new MemoryStore(), $this->pack(), $this->config());
+
+        $conversation = new Conversation('c1');
+        $conversation->recordVisitor('Sara Ali, +971 50 123 4567 - call me about the marina flat');
+
+        $result = $box->run('save_lead', ['name' => 'Sara Ali', 'phone' => '+971 50 123 4567', 'message' => 'marina flat'], $conversation);
+
+        $this->assertTrue($result['saved']);
+        $this->assertCount(1, $leads->leads);
+        $this->assertSame('Sara Ali', $leads->leads[0]['name']);
     }
 
     public function test_read_only_menus_keep_the_writers_out(): void

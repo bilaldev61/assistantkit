@@ -75,6 +75,16 @@ final class QuickAnswers
     }
 
     /**
+     * A bare acknowledgement - "yes", "ok", "sure" - answers whatever the
+     * assistant just offered. The repeat guard leaves it alone: two yeses in a
+     * row are taking up two different offers, not re-asking one question.
+     */
+    public function isAgreement(string $message): bool
+    {
+        return $this->pack->matches('agreement', Text::normalise($message));
+    }
+
+    /**
      * The last gate before a model call: nothing above could answer this, so is
      * it even about this trade? Asked here rather than up front so that contact,
      * hours and area questions - which carry no trade word - still answer free.
@@ -87,13 +97,37 @@ final class QuickAnswers
             return false;
         }
 
-        // With an item open every question is about that item until the visitor
-        // says otherwise, so there is nothing here to gate.
-        if ($conversation->itemSlug !== null) {
+        $text = Text::normalise($message);
+
+        // Distress anywhere in the thread stands the gate down first: a later
+        // message in an emergency conversation is not a new off-topic visitor.
+        if ($this->pack->matches('distress', $text)) {
             return false;
         }
 
-        $text = Text::normalise($message);
+        foreach ($conversation->messages as $said) {
+            if ($this->pack->matches('distress', Text::normalise((string) $said['content']))) {
+                return false;
+            }
+        }
+
+        // Creative writing and general knowledge are never this trade's business,
+        // on any page. An open item makes "it" and "this" about that item, but it
+        // does not make "write a story" or "who is the ruler" in scope - so these
+        // are declined here, before the item-open bypass. The allowlist guards it:
+        // a trade word, a judgement or a number means it is not caught.
+        if ($this->pack->matches('off_topic', $text)
+            && ! $this->pack->matches('in_scope', $text)
+            && ! $this->pack->matches('judgement', $text)
+            && ! Text::hasDigit($text)) {
+            return true;
+        }
+
+        // With an item open every other question is about that item until the
+        // visitor says otherwise, so there is nothing more to gate.
+        if ($conversation->itemSlug !== null) {
+            return false;
+        }
 
         // A handful of words carries no topic of its own - "tell me more", "is
         // it available". Those are continuations, and the model has the history.
@@ -109,14 +143,6 @@ final class QuickAnswers
             || $this->pack->matches('judgement', $text)
             || Text::hasDigit($text)) {
             return false;
-        }
-
-        // Distress anywhere in the thread stands the gate down: a later message
-        // in an emergency conversation is not a new off-topic visitor.
-        foreach ($conversation->messages as $said) {
-            if ($this->pack->matches('distress', Text::normalise((string) $said['content']))) {
-                return false;
-            }
         }
 
         return true;

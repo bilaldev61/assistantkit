@@ -339,6 +339,23 @@ class AssistantTest extends TestCase
         $this->assertSame('rule:greeting', $reply->kind);
     }
 
+    public function test_acknowledgements_are_exempt_from_the_repeat_guard(): void
+    {
+        foreach (['yes', 'ok', 'sure', 'yeah', 'go ahead'] as $word) {
+            $model = new ScriptedModel('Happy to help.');
+            $assistant = $this->assistant($model);
+
+            $assistant->reply("chat-{$word}", $word);
+            $reply = $assistant->reply("chat-{$word}", $word);
+
+            // A bare acknowledgement answers whatever the assistant just offered.
+            // Two in a row are taking up two different offers, not re-asking one
+            // question, so the repeat guard leaves them alone like small talk.
+            $this->assertSame('ai', $reply->kind, "\"{$word}\" twice should not be a repeat");
+            $this->assertCount(2, $model->prompts);
+        }
+    }
+
     public function test_a_repeat_does_not_file_the_question_twice(): void
     {
         $assistant = $this->assistant();
@@ -441,16 +458,40 @@ class AssistantTest extends TestCase
         $this->assertCount(1, $model->prompts);
     }
 
-    public function test_a_question_with_an_item_open_is_never_gated(): void
+    public function test_an_off_topic_intent_is_declined_even_with_an_item_open(): void
     {
-        $model = new ScriptedModel('From the model.');
+        $model = new ScriptedModel('The Ruler of Dubai is Sheikh Mohammed.');
 
         $reply = $this->assistant($model)->reply('chat-1', 'who is the current prime minister of the uae', 'marina-2br');
 
-        // On an item page every question is about that item until the visitor
-        // says otherwise, so there is nothing here to gate.
+        // An open item makes "it" and "this" about that item, but it does not
+        // make "who is the prime minister" in scope. The narrow intent denylist
+        // declines it before the item-open bypass, so the model never buys a
+        // polite refusal - and a small model often answers rather than declines.
+        $this->assertSame('rule:off_topic', $reply->kind);
+        $this->assertSame([], $model->prompts);
+    }
+
+    public function test_an_in_scope_question_with_an_item_open_still_reaches_the_model(): void
+    {
+        $model = new ScriptedModel('The owner is a private investor.');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'who is the owner', 'marina-2br');
+
+        // "owner" is a trade word, so the denylist guard lets it through and the
+        // item-open bypass still hands it to the model with the listing in view.
         $this->assertSame('ai', $reply->kind);
         $this->assertCount(1, $model->prompts);
+    }
+
+    public function test_a_creative_writing_request_is_declined_even_with_an_item_open(): void
+    {
+        $model = new ScriptedModel('Once upon a time in Dubai...');
+
+        $reply = $this->assistant($model)->reply('chat-1', 'write a story about dubai', 'marina-2br');
+
+        $this->assertSame('rule:off_topic', $reply->kind);
+        $this->assertSame([], $model->prompts);
     }
 
     public function test_distress_reaches_the_model_and_stands_the_gate_down_for_the_thread(): void

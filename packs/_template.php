@@ -94,6 +94,9 @@ return [
     'intents' => [
         'greeting'  => '/^(?:hi+|h[ae]l+o+|hl+o*w?|hey+|hy+|hai|sala+m|slm|assalam[u]? ?o? ?alaikum|aoa|yo|good (?:morning|afternoon|evening|day))(?:\s+(?:ge|ji|yaar|sahab|sir|bhai|na|haan|bas|to))*\s*$/i',
         'thanks'    => '/\b(thanks|thank you|appreciate it)\b/i',
+        // A bare acknowledgement answers the assistant's last offer. The repeat
+        // guard leaves it alone, so two yeses in a row are not one question re-asked.
+        'agreement' => '/^(?:yes+|yeah|yep|yup|sure|ok|okay|okey|please|pls|go ahead|why not)\b/i',
         'identity'  => '/\b(?:are you|you(?:\'re| are)?)\s+(?:an?\s+|the\s+)?(?:real|human|person|ai|bot|robot|artificial|chat.?gpt|openai)\b|\b(?:who\s+(?:made|built|created)\s+you|what\s+are\s+you|is\s+this\s+(?:ai|a\s+bot|a\s+robot))\b/i',
         'search'    => '/\b(looking for|do you have|show me|any |options|list)\b/i',
         'judgement' => '/\b(compare|better|best|recommend|should i|why|worth it)\b/i',
@@ -105,6 +108,10 @@ return [
         // named. Leave place names out: one place word must not switch the gate
         // off for "are visas open".
         'in_scope'  => '/\b(item|items|price|cost|budget|buy|buying|sell|sale|rent|rental|stock|available|size|order|delivery|warranty|discount|offer|booking|appointment)\b/i',
+        // The narrow exception to the allowlist: unambiguous creative-writing and
+        // general-knowledge intents, declined before the item-open bypass and
+        // guarded by in_scope/judgement/digit above. Not a ban list of topics.
+        'off_topic' => '/\b(?:write|compose|create|make|generate|tell|give|sing)\b.{0,40}\b(?:story|poem|essay|joke|song|novel|fiction|tale|rhyme|script|limerick)\b|\b(?:who|whos|what|whats|when|where)\b.{0,40}\b(?:ruler|president|prime minister|king|queen|capital|population|weather|news|visa|flight|currency|language|religion)\b|\b(?:ruler|president|prime minister|king|queen)\s+of\b/i',
         // A person in distress is not an off-topic visitor. Universal words:
         // leave these as they are unless your trade needs more.
         'distress'  => '/\b(kidnap\w*|abduct\w*|hostage|emergency|ambulance|police|999|911|in danger|help me|suicid\w*|kill (?:myself|me)|heart attack|trapped|threaten\w*|attacked|bleeding|dying)\b/i',

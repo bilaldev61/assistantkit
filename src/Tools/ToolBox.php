@@ -178,7 +178,7 @@ final class ToolBox
             ),
             new Tool(
                 'save_lead',
-                'Save the visitor\'s contact details. Call it once the visitor has given a name and an email, or a phone number.',
+                'Save the visitor\'s contact details. Call it once the visitor has typed a name and an email, or a phone number, in this chat. Never invent or complete details they did not give.',
                 [
                     'type'       => 'object',
                     'properties' => [
@@ -288,6 +288,11 @@ final class ToolBox
             throw new ToolError('An email or a phone number is required.');
         }
 
+        // The model writes these arguments and has been seen inventing a name and
+        // a number just to satisfy the schema. A lead the team cannot act on is
+        // worse than no lead, so ground every identifier in what the visitor typed.
+        $this->assertTyped($input, $conversation);
+
         $conversation->leadRef = $this->leads->capture([
             'name'    => trim((string) ($input['name'] ?? '')) ?: null,
             'email'   => $email,
@@ -299,6 +304,56 @@ final class ToolBox
         ]);
 
         return ['saved' => true, 'lead_ref' => $conversation->leadRef];
+    }
+
+    /**
+     * Ground the contact details in the visitor's own words: any name, email or
+     * phone handed to save_lead must appear in something they typed in this chat.
+     * The model may pass details on, never make them up - a fabricated lead is one
+     * the team cannot act on and a false promise to the visitor that we have them.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    private function assertTyped(array $input, Conversation $conversation): void
+    {
+        $typed = '';
+
+        foreach ($conversation->messages as $said) {
+            if (($said['role'] ?? '') === 'user') {
+                $typed .= ' ' . (string) ($said['content'] ?? '');
+            }
+        }
+
+        $words  = trim(preg_replace('/\s+/', ' ', mb_strtolower($typed)));
+        $digits = preg_replace('/\D/', '', $typed);
+
+        $name  = trim(preg_replace('/\s+/', ' ', mb_strtolower((string) ($input['name'] ?? ''))));
+        $email = mb_strtolower(trim((string) ($input['email'] ?? '')));
+        $phone = trim((string) ($input['phone'] ?? ''));
+        $phoneDigits = preg_replace('/\D/', '', $phone);
+
+        $missing = [];
+
+        if ($name !== '' && ! str_contains($words, $name)) {
+            $missing[] = 'that name';
+        }
+
+        if ($email !== '' && ! str_contains($words, $email)) {
+            $missing[] = 'that email address';
+        }
+
+        if ($phone !== '' && ($phoneDigits === '' || ! str_contains($digits, $phoneDigits))) {
+            $missing[] = 'that phone number';
+        }
+
+        if ($missing === []) {
+            return;
+        }
+
+        throw new ToolError(
+            'The visitor has not typed ' . implode(' or ', $missing) . ' in this chat. '
+            . 'Ask them for it and wait for them to type it before saving a lead. Never invent or complete contact details.'
+        );
     }
 
     /**

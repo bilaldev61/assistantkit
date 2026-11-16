@@ -175,11 +175,13 @@ final class Assistant
      * The same sentence sent again, with a reply already between the two.
      *
      * Only the words decide it, so capitals and punctuation do not buy a second
-     * model call. Small talk is left alone.
+     * model call. Small talk is left alone, and so is a bare agreement ("yes",
+     * "ok"): it answers whatever the assistant just offered, so two yeses in a
+     * row are taking up two different offers, not re-asking one question.
      */
     private function repeats(Conversation $conversation, string $message): bool
     {
-        if ($this->quick->isSmallTalk($message)) {
+        if ($this->quick->isSmallTalk($message) || $this->quick->isAgreement($message)) {
             return false;
         }
 
